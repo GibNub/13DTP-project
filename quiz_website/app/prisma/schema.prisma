@@ -1,0 +1,15 @@
+datasource db {
+    provider = "sqlite"
+    url      = "file:database/quiz_site.sqlite"
+}
+
+generator db {
+  provider  = "prisma-client-py"
+  interface = "sync"
+}
+
+model User {
+    id       Int @id @default(autoincrement())
+    username String
+    password String
+}
