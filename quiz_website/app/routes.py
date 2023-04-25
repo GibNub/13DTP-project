@@ -1,16 +1,21 @@
-from flask import render_template
+from flask import render_template, url_for, flash, request
 from prisma import Prisma
 
-import forms
-from app import app
+from app import forms, db, app
 
-db = Prisma()
 
-@app.route('/')
+# Renders home page
+@app.get('/')
 def home():
     return render_template('home.html')
 
 
-@app.route('/about')
-def about():
-    return render_template('about.html')
+# Account page, no session shows signup/login
+@app.route('/account', methods=['GET', 'POST'])
+def account():
+    form = forms.SignUp()
+    if form.validate_on_submit():
+        print('success')
+    return render_template('account.html', form=form)
+
+

@@ -8,16 +8,16 @@
 </head>
 <body>
     <header>
-        {% block header %}{% endblock %}
+        {% include 'header.html' %}
     </header>
     <nav>
-        {% block nav %}{% endblock %}
+        {% include 'nav.html' %}
     </nav>
     <main>
         {% block content %}{% endblock %}
     </main>
     <footer>
-        {% block footer %}{% endblock %}
+        {% include 'footer.html' %}
     </footer>
 </body>
 </html>

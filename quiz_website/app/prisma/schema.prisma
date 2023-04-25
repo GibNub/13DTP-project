@@ -1,15 +1,59 @@
+// Database
 datasource db {
-    provider = "sqlite"
-    url      = "file:database/quiz_site.sqlite"
+  provider = "sqlite"
+  url      = "file:./quiz_site.db"
 }
 
+// Generator
 generator db {
   provider  = "prisma-client-py"
   interface = "sync"
+  recursive_type_depth = 5
 }
 
+// Models
 model User {
-    id       Int @id @default(autoincrement())
-    username String
-    password String
+  user_id     Int @id @default(autoincrement())
+  username    String
+  password    String
+  email       String
+  admin       Int
+  confirmed   Int
+  quizzes     Quiz[]
+  quiz_score  UserScore[]
+}
+
+model Quiz {
+  quiz_id     Int  @id @default(autoincrement())
+  user        User @relation(fields: [user_id], references: [user_id])
+  user_id     Int 
+  name        String
+  questions   Question[]
+  user_score  UserScore[]
+}
+
+model Question {
+  question_id Int  @id @default(autoincrement())
+  quiz        Quiz @relation(fields: [quiz_id], references: [quiz_id])
+  quiz_id     Int
+  question    String
+  type        Int
+  answers     Answer[]
+}
+
+model Answer {
+  answer_id   Int      @id @default(autoincrement())
+  question    Question @relation(fields: [question_id], references: [question_id])
+  question_id Int
+  answer      String 
+}
+
+model UserScore {
+  user        User @relation(fields: [user_id], references: [user_id])
+  user_id     Int
+  quiz        Quiz @relation(fields: [quiz_id], references: [quiz_id])
+  quiz_id     Int
+  score       Int
+
+  @@id([user_id, quiz_id])
 }

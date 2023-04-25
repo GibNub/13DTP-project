@@ -1,0 +1,10 @@
+{% extends 'layout.html' %}
+{% block content %}
+<form method="POST" action="{{ url_for('account') }}">
+    {{ form.csrf_token }}
+    {{ form.username }}
+    {{ form.email }}
+    {{ form.password }}
+    <input type="submit" value="Submit">
+</form>
+{% endblock %}
