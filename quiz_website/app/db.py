@@ -1,4 +1,4 @@
-from prisma import Prisma
+import prisma
 
-db = Prisma()
+db = prisma.Prisma()
 db.connect()

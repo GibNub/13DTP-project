@@ -1,10 +1,18 @@
 {% extends 'layout.html' %}
 {% block content %}
-<form method="POST" action="{{ url_for('account') }}">
-    {{ form.csrf_token }}
-    {{ form.username }}
-    {{ form.email }}
-    {{ form.password }}
-    <input type="submit" value="Submit">
+<p>Sign Up</p>
+<form method="POST" action="{{ url_for('account_signup') }}">
+    {{ signup_form.csrf_token }}
+    {{ signup_form.signup_username }}
+    {{ signup_form.signup_email }}
+    {{ signup_form.signup_password }}
+    <input type="submit" id="signup-form" name="signup-form" value="Submit">
+</form>
+<p>Login</p>
+<form method="POST" action="{{ url_for('account_login') }}">
+    {{ login_form.login_csrf_token }}
+    {{ login_form.login_username }}
+    {{ login_form.login_password }}
+    <input type="submit" id="login-form" name="login-form" value="Submit">
 </form>
 {% endblock %}
