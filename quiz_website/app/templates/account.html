@@ -10,7 +10,7 @@
 </form>
 <p>Login</p>
 <form method="POST" action="{{ url_for('account_login') }}">
-    {{ login_form.login_csrf_token }}
+    {{ login_form.csrf_token }}
     {{ login_form.login_username }}
     {{ login_form.login_password }}
     <input type="submit" id="login-form" name="login-form" value="Submit">

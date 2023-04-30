@@ -22,8 +22,9 @@ def account():
 
 @app.post('/account/signup')
 def account_signup():
-
     signup_form = forms.SignUp()
+    if request.form:
+        print('Information received')
     # Create user account
     if 'signup-form' in request.form and signup_form.validate_on_submit():
         username = signup_form.signup_username.data
@@ -33,18 +34,18 @@ def account_signup():
             data = {
                 'username'  : username,
                 'email'     : email,
-                'password'  : password_hash,
+                'password_hash'  : password_hash,
                 'admin'     : 0,
                 'confirmed' : 0,
             }   
         )
+        print('Account created')
     return redirect(url_for('account'))
 
 @app.post('/account/login')
 def account_login():
     login_form = forms.Login()
     if 'login-form' in request.form and login_form.validate_on_submit():
-        print('worked')
         username = login_form.login_username.data
         password = login_form.login_password.data
         user_data = User.prisma().find_first(
@@ -52,7 +53,9 @@ def account_login():
                 'username' : username
             }
         )
-        print(user_data)
         # Check usernames and passwords
-
+        if check_password_hash(user_data.password_hash, password):
+            print('logged')
+        else:
+            print('user or pass incorrect')
     return redirect(url_for('account'))

@@ -13,14 +13,14 @@ generator db {
 
 // Models
 model User {
-  user_id     Int @id @default(autoincrement())
-  username    String
-  password    String
-  email       String
-  admin       Int
-  confirmed   Int
-  quizzes     Quiz[]
-  quiz_score  UserScore[]
+  user_id          Int @id @default(autoincrement())
+  username         String
+  password_hash    String
+  email            String
+  admin            Int
+  confirmed        Int
+  quizzes          Quiz[]
+  quiz_score       UserScore[]
 }
 
 model Quiz {
