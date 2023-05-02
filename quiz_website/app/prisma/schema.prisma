@@ -17,10 +17,13 @@ model User {
   username         String
   password_hash    String
   email            String
-  admin            Int
-  confirmed        Int
+  admin            Boolean @default(false)
+  confirmed        Boolean @default(false)
   quizzes          Quiz[]
   quiz_score       UserScore[]
+  is_active        Boolean @default(false)
+  is_authenticated Boolean @default(false)
+  is_anonymous     Boolean @default(true)
 }
 
 model Quiz {

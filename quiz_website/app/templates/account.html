@@ -8,6 +8,7 @@
     {{ signup_form.signup_password }}
     <input type="submit" id="signup-form" name="signup-form" value="Submit">
 </form>
+
 <p>Login</p>
 <form method="POST" action="{{ url_for('account_login') }}">
     {{ login_form.csrf_token }}

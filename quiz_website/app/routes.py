@@ -1,9 +1,20 @@
 from flask import render_template, url_for, flash, redirect, request
+from flask_login import login_user
+from werkzeug.security import generate_password_hash, check_password_hash
 from prisma import Prisma
 from prisma.models import User
-from werkzeug.security import generate_password_hash, check_password_hash
 
-from app import forms, app
+from app import forms, login_manager, app
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    user = User.prisma().find_first(
+        where={
+            'user_id' : user_id
+        }
+    )
+    return user
 
 
 # Renders home page
@@ -23,8 +34,6 @@ def account():
 @app.post('/account/signup')
 def account_signup():
     signup_form = forms.SignUp()
-    if request.form:
-        print('Information received')
     # Create user account
     if 'signup-form' in request.form and signup_form.validate_on_submit():
         username = signup_form.signup_username.data
@@ -32,15 +41,15 @@ def account_signup():
         password_hash = generate_password_hash(signup_form.signup_password.data, salt_length=16)
         User.prisma().create(
             data = {
-                'username'  : username,
-                'email'     : email,
+                'username'       : username,
+                'email'          : email,
                 'password_hash'  : password_hash,
-                'admin'     : 0,
-                'confirmed' : 0,
+                'admin'          : 0,
+                'confirmed'      : 0,
             }   
         )
-        print('Account created')
     return redirect(url_for('account'))
+
 
 @app.post('/account/login')
 def account_login():
@@ -55,7 +64,6 @@ def account_login():
         )
         # Check usernames and passwords
         if check_password_hash(user_data.password_hash, password):
-            print('logged')
-        else:
-            print('user or pass incorrect')
-    return redirect(url_for('account'))
+            print(user_data.user_id)
+            login_user(user_data.user_id)
+    return redirect(url_for('account')) 

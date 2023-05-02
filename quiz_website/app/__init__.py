@@ -9,11 +9,9 @@ from app.db import db
 
 register(db)
 app = Flask(__name__)
-# login_manager = LoginManager()
-
+login_manager = LoginManager()
 app.config['SECRET_KEY'] = environments.SECRET_KEY
-
-# login_manager.init_app(app)
+login_manager.init_app(app)
 
 from app import routes
 
