@@ -1,20 +1,22 @@
 from flask import render_template, url_for, flash, redirect, request
-from flask_login import login_user
+from flask_login import login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from prisma import Prisma
 from prisma.models import User
 
 from app import forms, login_manager, app
+from app.user import UserClass
 
 
+# Check if the user object is still valid
 @login_manager.user_loader
-def load_user(user_id):
+def user_loader (user_id):
     user = User.prisma().find_first(
         where={
             'user_id' : user_id
         }
     )
-    return user
+    return UserClass(user.__dict__)
 
 
 # Renders home page
@@ -44,8 +46,6 @@ def account_signup():
                 'username'       : username,
                 'email'          : email,
                 'password_hash'  : password_hash,
-                'admin'          : 0,
-                'confirmed'      : 0,
             }   
         )
     return redirect(url_for('account'))
@@ -62,8 +62,15 @@ def account_login():
                 'username' : username
             }
         )
+        user = UserClass(user_data.__dict__)
         # Check usernames and passwords
-        if check_password_hash(user_data.password_hash, password):
-            print(user_data.user_id)
-            login_user(user_data.user_id)
-    return redirect(url_for('account')) 
+        if check_password_hash(user.password, password):
+            login_user(user)
+
+    return redirect(url_for('account'))
+
+
+@app.get('/settings')
+@login_required
+def settings():
+    return 'hello'

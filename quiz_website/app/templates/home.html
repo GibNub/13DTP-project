@@ -2,4 +2,9 @@
 {% block content %}
 {{ info }}
 helo
+{% if current_user.is_authenticated %}
+    Authed {{ current_user }}
+{% else %}
+    not authed {{ current_user }}
+{% endif %}
 {% endblock %}

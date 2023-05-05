@@ -7,9 +7,10 @@ from app import environments
 from app.db import db
 
 
-register(db)
 app = Flask(__name__)
+register(db)
 login_manager = LoginManager()
+
 app.config['SECRET_KEY'] = environments.SECRET_KEY
 login_manager.init_app(app)
 
