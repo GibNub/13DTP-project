@@ -1,4 +1,4 @@
-from flask_login import UserMixin
+from flask_login import UserMixin, AnonymousUserMixin
 
 
 class UserClass(UserMixin):
@@ -13,3 +13,8 @@ class UserClass(UserMixin):
 
     def is_admin(self):
         return self.admin
+    
+
+class AnonymousUser(AnonymousUserMixin):
+    def __init__(self) -> None:
+        self.username = 'Anonymous'

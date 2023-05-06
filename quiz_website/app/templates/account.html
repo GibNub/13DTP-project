@@ -6,7 +6,7 @@
     {{ signup_form.signup_username }}
     {{ signup_form.signup_email }}
     {{ signup_form.signup_password }}
-    <input type="submit" id="signup-form" name="signup-form" value="Submit">
+    {{ signup_form.submit }}
 </form>
 
 <p>Login</p>
@@ -14,6 +14,8 @@
     {{ login_form.csrf_token }}
     {{ login_form.login_username }}
     {{ login_form.login_password }}
-    <input type="submit" id="login-form" name="login-form" value="Submit">
+    {{ login_form.remember.label }}
+    {{ login_form.remember }}
+    {{ login_form.submit }}
 </form>
 {% endblock %}

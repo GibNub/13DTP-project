@@ -10,10 +10,10 @@ from app.user import UserClass
 
 # Check if the user object is still valid
 @login_manager.user_loader
-def user_loader (user_id):
+def user_loader(user_id):
     user = User.prisma().find_first(
         where={
-            'user_id' : user_id
+            'user_id' : int(user_id)
         }
     )
     return UserClass(user.__dict__)
@@ -24,13 +24,29 @@ def user_loader (user_id):
 def home():
     return render_template('home.html')
 
-
+# User Account views
 # Account page, no session shows signup/login
 @app.get('/account')
 def account():
     signup_form = forms.SignUp()
     login_form = forms.Login()
     return render_template('account.html', signup_form=signup_form, login_form=login_form)
+
+
+# Account settings page
+@app.get('/settings')
+@login_required
+def settings():
+    return 'hello'
+
+
+# Log user out
+@app.get('/account/logout')
+@login_required
+def account_logout():
+    logout_user()
+    flash('You have been logged out')
+    return redirect(url_for('account'))
 
 
 @app.post('/account/signup')
@@ -40,6 +56,7 @@ def account_signup():
     if 'signup-form' in request.form and signup_form.validate_on_submit():
         username = signup_form.signup_username.data
         email = signup_form.signup_email.data
+        # Hash password and store user data
         password_hash = generate_password_hash(signup_form.signup_password.data, salt_length=16)
         User.prisma().create(
             data = {
@@ -51,26 +68,27 @@ def account_signup():
     return redirect(url_for('account'))
 
 
+# Logs user in if creds are valid
 @app.post('/account/login')
 def account_login():
     login_form = forms.Login()
     if 'login-form' in request.form and login_form.validate_on_submit():
         username = login_form.login_username.data
         password = login_form.login_password.data
+        remember = login_form.remember.data
         user_data = User.prisma().find_first(
             where={
                 'username' : username
             }
         )
-        user = UserClass(user_data.__dict__)
-        # Check usernames and passwords
-        if check_password_hash(user.password, password):
-            login_user(user)
-
+        if not user_data:
+            flash('User does not exist')
+        else:
+            user = UserClass(user_data.__dict__)
+            # Check usernames and passwords
+            if check_password_hash(user.password, password):
+                login_user(user, remember=remember)
+            else:
+                flash('Username or password is incorrect')
     return redirect(url_for('account'))
 
-
-@app.get('/settings')
-@login_required
-def settings():
-    return 'hello'
