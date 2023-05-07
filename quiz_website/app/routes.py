@@ -24,6 +24,7 @@ def user_loader(user_id):
 def home():
     return render_template('home.html')
 
+
 # User Account views
 # Account page, no session shows signup/login
 @app.get('/account')
@@ -31,13 +32,6 @@ def account():
     signup_form = forms.SignUp()
     login_form = forms.Login()
     return render_template('account.html', signup_form=signup_form, login_form=login_form)
-
-
-# Account settings page
-@app.get('/settings')
-@login_required
-def settings():
-    return 'hello'
 
 
 # Log user out
@@ -92,3 +86,9 @@ def account_login():
                 flash('Username or password is incorrect')
     return redirect(url_for('account'))
 
+
+# Settings page
+@app.get('/settings')
+@login_required
+def settings():
+    return render_template('settings.html')
