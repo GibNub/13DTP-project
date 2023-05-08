@@ -1,7 +1,6 @@
 from flask import render_template, url_for, flash, redirect, request
-from flask_login import login_user, login_required, logout_user, current_user
+from flask_login import login_user, login_required, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from prisma import Prisma
 from prisma.models import User
 
 from app import forms, login_manager, app
@@ -31,7 +30,7 @@ def home():
 def account():
     signup_form = forms.SignUp()
     login_form = forms.Login()
-    return render_template('account.html', signup_form=signup_form, login_form=login_form)
+    return render_template('account_manage.html', signup_form=signup_form, login_form=login_form)
 
 
 # Log user out
@@ -75,6 +74,7 @@ def account_login():
                 'username' : username
             }
         )
+        print(user_data)
         if not user_data:
             flash('User does not exist')
         else:
@@ -92,3 +92,11 @@ def account_login():
 @login_required
 def settings():
     return render_template('settings.html')
+
+
+# Account pages
+# Main account page
+@app.get('/acconut/myaccount')
+@login_required
+def my_account():
+    return render_template('account_page.html')

@@ -4,6 +4,7 @@ from wtforms import StringField, PasswordField, SubmitField, EmailField, Boolean
 from wtforms.validators import DataRequired
 
 
+# Accounts
 class SignUp(FlaskForm):
     signup_username = StringField('Username', validators=[DataRequired()])
     signup_email = EmailField('Email', validators=[DataRequired()])
@@ -16,3 +17,12 @@ class Login(FlaskForm):
     login_password = PasswordField('Password', validators=[DataRequired()])
     remember = BooleanField('Remember me')
     submit = SubmitField('Login', name='login-form', id='login-form')
+
+# Quizzes
+class CreateQuiz(FlaskForm):
+    name = StringField('Name', validators=[DataRequired()])
+
+
+class QuizQuestion(FlaskForm):
+    pass
+
