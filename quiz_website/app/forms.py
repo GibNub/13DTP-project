@@ -18,11 +18,9 @@ class Login(FlaskForm):
     remember = BooleanField('Remember me')
     submit = SubmitField('Login', name='login-form', id='login-form')
 
-# Quizzes
-class CreateQuiz(FlaskForm):
-    name = StringField('Name', validators=[DataRequired()])
 
-
-class QuizQuestion(FlaskForm):
-    pass
-
+class Quiz(FlaskForm):
+    name = StringField(validators=[DataRequired()])
+    desc = StringField(validators=[DataRequired()])
+    # Quiz question info
+    submit = SubmitField('Create', name='quiz-info', id='quiz-info')

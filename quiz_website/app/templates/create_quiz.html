@@ -1,0 +1,16 @@
+{% extends 'layout.html' %}
+{% block content %}
+<script src="{{ url_for('static', filename='quizQuestion.js') }}"></script>
+<form action="{{ url_for('create_quiz') }}" method="POST">
+    {{ quiz_form.csrf_token }}
+    Name {{ quiz_form.name }} <br>
+    Desc {{ quiz_form.desc }} <br>
+    <div id="quiz-question">
+
+    </div>
+    s {{ quiz_form.submit }}
+</form>
+<button onclick="addQuestion()" >Add question</button>
+{% endblock %}
+
+
