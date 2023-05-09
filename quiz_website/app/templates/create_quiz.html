@@ -1,26 +1,16 @@
 {% extends 'layout.html' %}
 {% block content %}
+<script src="{{ url_for('static', filename='quizQuestion.js') }}"></script>
 <form action="{{ url_for('create_quiz') }}" method="POST">
     {{ quiz_form.csrf_token }}
     Name {{ quiz_form.name }} <br>
     Desc {{ quiz_form.desc }} <br>
-    <div id="quiz_questions">
-        <input type="text" name="question{{ loop.index }}" id="question{{ loop.index }}" required>
-        <input type="text" name="answer{{ loop.index }}" id="answer{{ loop.index }}" required>
+    <div id="quiz-question">
+
     </div>
     s {{ quiz_form.submit }}
 </form>
+<button onclick="addQuestion()" >Add question</button>
 {% endblock %}
 
-<script>
-    const form = document.getElementById('quiz_questions');
-    
-    function addInput()
-    {
-        const question = document.createElement('input');
-        const answer = document.createElement('input')
-        const type = document.createElement('input')
-        form.appendChild()
-    }
 
-</script>
