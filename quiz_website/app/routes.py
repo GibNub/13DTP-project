@@ -42,7 +42,7 @@ def account_logout():
     flash('You have been logged out')
     return redirect(url_for('account'))
 
-
+# Sign up request
 @app.post('/account/signup')
 def account_signup():
     signup_form = forms.SignUp()
@@ -88,7 +88,23 @@ def account_login():
 
 
 # Settings page
-@app.get('/settings')
+@app.get('/account/settings')
 @login_required
 def settings():
     return render_template('settings.html')
+
+
+# page to create new quiz
+@app.get('/quiz/create')
+def quiz_creation():
+    quiz_form = forms.Quiz()
+    return render_template('create_quiz.html', quiz_form=quiz_form)
+
+
+@app.post('/quiz/create_quiz')
+def create_quiz():
+    quiz_form = forms.Quiz()
+    print(request.form)
+    if 'quiz-form' in request.form and quiz_form.validate_on_submit():
+        print(request.form)
+    return redirect(url_for('home'))

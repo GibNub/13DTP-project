@@ -16,3 +16,10 @@ class Login(FlaskForm):
     login_password = PasswordField('Password', validators=[DataRequired()])
     remember = BooleanField('Remember me')
     submit = SubmitField('Login', name='login-form', id='login-form')
+
+
+class Quiz(FlaskForm):
+    name = StringField(validators=[DataRequired()])
+    desc = StringField(validators=[DataRequired()])
+    # Quiz question info
+    submit = SubmitField('Create', name='quiz-info', id='quiz-info')
