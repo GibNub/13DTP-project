@@ -9,7 +9,7 @@ class SignUp(FlaskForm):
     signup_username = StringField('Username', validators=[DataRequired()])
     signup_email = EmailField('Email', validators=[DataRequired()])
     signup_password = PasswordField('Password', validators=[DataRequired()])
-    submit = SubmitField('Signup', name='signup-form', id='signup-forn')
+    submit = SubmitField('Signup', name='signup-form', id='signup-form')
 
 
 class Login(FlaskForm):
@@ -23,4 +23,4 @@ class Quiz(FlaskForm):
     name = StringField(validators=[DataRequired()])
     desc = StringField(validators=[DataRequired()])
     # Quiz question info
-    submit = SubmitField('Create', name='quiz-info', id='quiz-info')
+    submit = SubmitField('Create', name='quiz-form', id='quiz-form')

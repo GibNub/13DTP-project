@@ -26,8 +26,9 @@ model User {
 model Quiz {
   quiz_id     Int  @id @default(autoincrement())
   user        User @relation(fields: [user_id], references: [user_id])
-  user_id     Int 
+  user_id     Int
   name        String
+  description String?
   questions   Question[]
   user_score  UserScore[]
 }

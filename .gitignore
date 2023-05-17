@@ -154,4 +154,4 @@ cython_debug/
 # Database
 .db
 .vscode
-quiz_website/app/prisma/schema.prisma
+schema.prisma

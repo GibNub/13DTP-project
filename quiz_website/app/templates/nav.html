@@ -2,7 +2,7 @@
     <li><a href="{{ url_for('home') }}">Home</a></li>
     {% if current_user.is_authenticated %}
     <li><a href="{{ url_for('settings') }}">Settings</a></li>
-    <li><a href="{{ url_for('my_account') }}">My Account</a></li>
+    <!-- <li><a href="{{ url_for('account') }}">My Account</a></li> -->
     <li><a href="{{ url_for('account_logout') }}">Logout</a></li>
     {% else %}
     <li><a href="{{ url_for('account') }}">Signup/Login</a></li>
