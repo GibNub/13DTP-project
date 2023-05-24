@@ -1,0 +1,9 @@
+{% extends 'layout.html' %}
+{% block content %}
+{% for q in quiz %}
+<h2>{{ q.name }}</h2>
+<p>{{ q.description }}</p>
+<p>{{ q.questions[0].question }}</p>
+<p>{{ q.questions[0].answers[0].answer}}</p>
+{% endfor %}
+{% endblock %}

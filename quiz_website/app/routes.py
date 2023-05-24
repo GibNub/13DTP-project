@@ -1,4 +1,4 @@
-from flask import render_template, url_for, flash, redirect, request, g
+from flask import render_template, url_for, flash, redirect, request
 from flask_login import login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from prisma import models
@@ -43,6 +43,7 @@ def account_logout():
     logout_user()
     flash('You have been logged out')
     return redirect(url_for('account'))
+
 
 # Sign up request
 @app.post('/account/signup')
@@ -97,6 +98,22 @@ def settings():
     return render_template('settings.html')
 
 
+# Display all the quizzes in a page
+@app.get('/quiz/view/all')
+def view_quiz():
+# Get quiz info, the questions, and the answer to each question
+    quiz = models.Quiz.prisma().find_many(
+        include={
+            'questions' : {
+                'include' : {
+                    'answers' : True
+                }
+            }
+        }
+    )
+    return render_template('display_quiz.html', quiz=quiz)
+
+
 # Pages to create quizzes
 # page to create new quiz
 @app.get('/quiz/create')
@@ -114,12 +131,11 @@ def create_quiz():
         questions = request.form.getlist('question')
         answers = request.form.getlist('answer')
         question_type = request.form.getlist('question-type')
-        # Check if lengths of each form field are equal
+        # Check if lengths of each form field are equal by comparing each list to the questions list
         info = [questions, answers, question_type]
-        if not all([len(info[i]) for i in range(0, len(info))]):
+        if not all([len(x) == len(info[0]) for x in info]):
             flash('The quiz you created was invalid as the amount of questions and answers are not equal')
             return redirect(url_for('quiz_creation'))
-        
         # Create quiz with name and desc
         models.Quiz.prisma().create(
             data={
@@ -153,5 +169,4 @@ def create_quiz():
                 'answer' : answers[0]
             }
         )
-
     return redirect(url_for('home'))

@@ -6,10 +6,10 @@ function setAttr(element, attr) {
 };
 
 
-// Creates a fie
-function addField(fieldName, type, questionNumber) {
+// Creates an input field 
+function addTextField(fieldName, questionNumber) {
   const attr = {
-    'type' : type,
+    'type' : 'text',
     'name' : fieldName,
     'id' : `${fieldName}-${questionNumber}`
   };
@@ -19,22 +19,49 @@ function addField(fieldName, type, questionNumber) {
 };
 
 
-let questionNumber = 0
-// Adds a new question field (question, answer, and type) to quiz form
-function addQuestion() {
-  questionNumber += 1
-  const form = document.getElementById('quiz-question');
-  const names = ['question', 'answer', 'question-type'];
-  const type = 'text'; // Add more field types later
-  const fieldDiv = document.createElement('div');
-  setAttr(fieldDiv, {'class' : 'question'});
-  for (let n in names) {
-    fieldDiv.appendChild(addField(names[n], type, questionNumber))
+// Select field
+function addSelectField(fieldName, questionNumber) {
+  const selectField = document.createElement('select');
+  setAttr(selectField, {
+    'name' : fieldName,
+    'id' : `${fieldName}-${questionNumber}`
+  });
+  // Question types
+  // 0 : True/false
+  // 1 : Written
+  // 2 : Multiple choice
+  questionType = ['True False', 'Written', 'Multiple Choice']
+  const selectLabel = document.createElement('option')
+  selectLabel.append(document.createTextNode('--Select question type--'))
+  selectField.appendChild(selectLabel)
+  for (let x in questionType) {
+    const option = document.createElement('option');
+    const node = document.createTextNode(questionType[x]);
+    option.setAttribute('value', x);
+    option.appendChild(node);
+    selectField.appendChild(option);
+    console.log(selectField)
   };
-  form.appendChild(fieldDiv);
+  return selectField;
 };
 
 
+let questionNumber = 0
+// Adds a new question field (question, answer, and type) to quiz form
+function addQuestion() {
+  const form = document.getElementById('quiz-question');
+  const fieldDiv = document.createElement('div');
+  setAttr(fieldDiv, {'class' : 'question'});
+  fieldDiv.appendChild(addTextField('question', questionNumber))
+  fieldDiv.appendChild(addTextField('answer', questionNumber))
+  // dropdown
+  fieldDiv.appendChild(addSelectField('question-type', questionNumber))
+  form.appendChild(fieldDiv);
+  questionNumber += 1
+};
+
+
+// Remove question div
 function removeLastQuestion() {
   const form = document.getElementById('quiz-question');
   form.removeChild(form.lastElementChild);
