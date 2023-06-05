@@ -1,9 +1,18 @@
 {% extends 'layout.html' %}
 {% block content %}
-{% for q in quiz %}
-<h2>{{ q.name }}</h2>
-<p>{{ q.description }}</p>
-<p>{{ q.questions[0].question }}</p>
-<p>{{ q.questions[0].answers[0].answer}}</p>
-{% endfor %}
+{# loop through all quizzes #}
+<div class="view-quiz">
+    {% for quiz in quiz %}
+    {# quiz info #}
+    <h2>Name : {{ quiz.name }}</h2>
+    <p>Description : {{ quiz.description }}</p>
+    {# loop through all questions in quiz #}
+        {% if quiz.questions %}
+            {% for question in quiz.questions %}
+                <p>Question : {{ question.question }}</p>
+                <p>Type : {{ types[question.type] }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endfor %}
+</div>
 {% endblock %}

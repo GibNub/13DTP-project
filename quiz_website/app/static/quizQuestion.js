@@ -40,7 +40,6 @@ function addSelectField(fieldName, questionNumber) {
     option.setAttribute('value', x);
     option.appendChild(node);
     selectField.appendChild(option);
-    console.log(selectField)
   };
   return selectField;
 };

@@ -102,6 +102,11 @@ def settings():
 @app.get('/quiz/view/all')
 def view_quiz():
 # Get quiz info, the questions, and the answer to each question
+    question_types = {
+        0 : 'True/False',
+        1 : 'Written',
+        2 : 'Multiple choice'
+    }
     quiz = models.Quiz.prisma().find_many(
         include={
             'questions' : {
@@ -111,7 +116,25 @@ def view_quiz():
             }
         }
     )
-    return render_template('display_quiz.html', quiz=quiz)
+    return render_template('display_quiz.html', quiz=quiz, types=question_types)
+
+
+# View individual quizzes
+@app.get('/quiz/view/<int:quiz_id>')
+def view_one_quiz(quiz_id):
+    quiz = models.Quiz.prisma().find_first(
+        include={
+            'questions' : {
+                'include' : {
+                    'answers' : True
+                }
+            }
+        },
+        where={
+            'quiz_id' : quiz_id
+        }
+    )
+    return render_template('display_one_quiz.html', quiz=quiz)
 
 
 # Pages to create quizzes
@@ -145,28 +168,34 @@ def create_quiz():
             }
         )
         # Create questions and answers
+        # Get recently added quiz_id
+        # Sort by decending
         quiz_id = models.Quiz.prisma().find_first(
             order={
                 'quiz_id' : 'desc'
             }
         ).quiz_id
-        models.Question.prisma().create(
-            data={
-                'quiz_id' : quiz_id,
-                'question' : questions[0],
-                'type' : 1,
-            }
-        )
-        # Create answer 
-        question_id = models.Question.prisma().find_first(
-            order={
-                'question_id' : 'desc'
-            }
-        ).question_id
-        models.Answer.prisma().create(
-            data={
-                'question_id' : question_id,
-                'answer' : answers[0]
-            }
-        )
+        # Loop to add every question, answer, and type for the quiz
+        for (q, a, qt) in zip(questions, answers, int(question_type)):
+            models.Question.prisma().create(
+                data={
+                    'quiz_id' : quiz_id,
+                    'question' : q,
+                    'type' : qt,
+                }
+            )
+            # Create answers
+            # Get the recently added question to FK answer
+            # sort descending
+            question_id = models.Question.prisma().find_first(
+                order={
+                    'question_id' : 'desc'
+                }
+            ).question_id
+            models.Answer.prisma().create(
+                data={
+                    'question_id' : question_id,
+                    'answer' : a,
+                }
+            )
     return redirect(url_for('home'))
