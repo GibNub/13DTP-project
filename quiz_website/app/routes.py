@@ -6,6 +6,11 @@ from prisma import models
 from app import forms, login_manager, app
 from app.user import UserClass
 
+QUESTION_TYPES = {
+        0 : 'True/False',
+        1 : 'Written',
+        2 : 'Multiple choice'
+    }
 
 # Check if the user object is still valid
 @login_manager.user_loader
@@ -102,11 +107,6 @@ def settings():
 @app.get('/quiz/view/all')
 def view_quiz():
 # Get quiz info, the questions, and the answer to each question
-    question_types = {
-        0 : 'True/False',
-        1 : 'Written',
-        2 : 'Multiple choice'
-    }
     quiz = models.Quiz.prisma().find_many(
         include={
             'questions' : {
@@ -116,7 +116,7 @@ def view_quiz():
             }
         }
     )
-    return render_template('display_quiz.html', quiz=quiz, types=question_types)
+    return render_template('display_quiz.html', quiz=quiz, types=QUESTION_TYPES)
 
 
 # View individual quizzes
@@ -134,7 +134,7 @@ def view_one_quiz(quiz_id):
             'quiz_id' : quiz_id
         }
     )
-    return render_template('display_one_quiz.html', quiz=quiz)
+    return render_template('display_one_quiz.html', quiz=quiz, types=QUESTION_TYPES)
 
 
 # Pages to create quizzes

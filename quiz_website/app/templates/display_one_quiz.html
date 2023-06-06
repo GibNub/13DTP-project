@@ -1,4 +1,14 @@
 {% extends 'layout.html' %}
 {% block content %}
-<h2>{{ quiz }}</h2>
+<div class="one-quiz">
+    <h2>Name : {{ quiz.name }}</h2>
+    <p>Description : {{ quiz.desc }}</p>
+    {# loop through all questions in quiz #}
+    {% if quiz.questions %}
+    {% for question in quiz.questions %}
+        <p>Question : {{ question.question }}</p>
+        <p>Type : {{ types[question.type] }}</p>
+    {% endfor %}
+    {% endif %}
+</div>
 {% endblock %}
