@@ -1,4 +1,5 @@
-from flask import render_template, url_for, flash, redirect, request
+import datetime
+from flask import render_template, url_for, flash, redirect, request, session
 from flask_login import login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from prisma import models
@@ -6,11 +7,29 @@ from prisma import models
 from app import forms, login_manager, app
 from app.user import UserClass
 
+
 QUESTION_TYPES = {
         0 : 'True/False',
         1 : 'Written',
         2 : 'Multiple choice'
     }
+
+
+def get_one_quiz(quiz_id):
+    quiz = models.Quiz.prisma().find_first(
+        include={
+            'questions' : {
+                'include' : {
+                    'answers' : True
+                }
+            }
+        },
+        where={
+            'quiz_id' : quiz_id
+        }
+    )
+    return quiz
+
 
 # Check if the user object is still valid
 @login_manager.user_loader
@@ -122,18 +141,7 @@ def view_quiz():
 # View individual quizzes
 @app.get('/quiz/view/<int:quiz_id>')
 def view_one_quiz(quiz_id):
-    quiz = models.Quiz.prisma().find_first(
-        include={
-            'questions' : {
-                'include' : {
-                    'answers' : True
-                }
-            }
-        },
-        where={
-            'quiz_id' : quiz_id
-        }
-    )
+    quiz = get_one_quiz(quiz_id)
     return render_template('display_one_quiz.html', quiz=quiz, types=QUESTION_TYPES)
 
 
@@ -199,3 +207,15 @@ def create_quiz():
                 }
             )
     return redirect(url_for('home'))
+
+
+# Attempting a quiz
+@app.get('/quiz/attempt/<int:quiz_id>')
+@login_required
+def attempt_quiz(quiz_id):
+    session['start_time'] = datetime.datetime.now()
+    quiz = get_one_quiz(quiz_id)
+    return render_template('attempt_quiz.html', quiz=quiz)
+
+
+# Submit quiz attempt

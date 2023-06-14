@@ -1,0 +1,24 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div>
+    {{ quiz }}
+    <h2>Name : {{ quiz.name }}</h2>
+    <p>Description : {{ quiz.desc }}</p>
+    <form action="">
+    {% for question in quiz.questions %}
+    <p>{{ question.question }}</p>
+        {% if question.type == 0 %}
+            {# true false question #}
+            <label for="true">True</label>
+            <input type="radio" name="choice" id="true">
+            <label for="false">False</label>
+            <input type="radio" name="choice" id="false">
+        {% elif question.type == 1 %}
+        {# Written type question #}
+            <input type="text" name="answer">
+        {% elif question.type == 2 %}
+        {% endif %}
+    </form>
+    {% endfor %}
+</div>
+{% endblock %}
