@@ -150,22 +150,37 @@ def view_one_quiz(quiz_id):
 @app.get('/quiz/create')
 @login_required
 def quiz_creation():
-    quiz_form = forms.Quiz()
-    return render_template('create_quiz.html', quiz_form=quiz_form)
+    quiz_info = forms.QuizInfo()
+    quiz_written = forms.WrittenQuestion()
+    quiz_fact = forms.TrueFalseQuestion()
+    quiz_multi = forms.MultipleChoiceQuestion()
+    return render_template(
+        'create_quiz.html',
+        quiz_info=quiz_info,
+        quiz_written=quiz_written,
+        quiz_fact=quiz_fact,
+        quiz_multi=quiz_multi,
+        )
 
 
 # Needs rewriting now
-@app.post('/quiz/create_quiz')
+@app.post('/quiz/create_quiz/<type>')
 @login_required
-def create_quiz():
+def create_quiz(type):
     # New Idea : users create one question at a time => easier on backend
-    quiz_form = forms.Quiz()
-    if 'quiz-form' in request.form and quiz_form.validate_on_submit():
-        print(quiz_form.data)
-        print(request.form)
-        return redirect(url_for('home'))
-    else:
-        return redirect(url_for('home'))
+    if type == '0':
+        form = forms.QuizInfo()
+        if 'quiz-info' in request.form and form.validate_on_submit():
+            models.Quiz.prisma().create(
+                data={
+                    'name' : form.name.data,
+                    'description' : form.desc.data,
+                    'user_id' : int(current_user.user_id)
+                }
+            )
+            return redirect(url_for('home'))
+        else:
+            return redirect(url_for('home'))
     # if 'quiz-form' in request.form and quiz_form.validate_on_submit():
     #     questions = request.form.getlist('question')
     #     answers = request.form.getlist('answer')
