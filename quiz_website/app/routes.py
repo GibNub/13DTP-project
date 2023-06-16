@@ -154,59 +154,67 @@ def quiz_creation():
     return render_template('create_quiz.html', quiz_form=quiz_form)
 
 
+# Needs rewriting now
 @app.post('/quiz/create_quiz')
 @login_required
 def create_quiz():
+    # New Idea : users create one question at a time => easier on backend
     quiz_form = forms.Quiz()
     if 'quiz-form' in request.form and quiz_form.validate_on_submit():
-        questions = request.form.getlist('question')
-        answers = request.form.getlist('answer')
-        question_type = request.form.getlist('question-type')
-        # Check if lengths of each form field are equal by comparing each list to the questions list
-        info = [questions, answers, question_type]
-        if not all([len(x) == len(info[0]) for x in info]):
-            flash('The quiz you created was invalid as the amount of questions and answers are not equal')
-            return redirect(url_for('quiz_creation'))
-        # Create quiz with name and desc
-        models.Quiz.prisma().create(
-            data={
-                'name' : quiz_form.name.data,
-                'description' : quiz_form.desc.data,
-                'user_id' : int(current_user.user_id)
-            }
-        )
-        # Create questions and answers
-        # Get recently added quiz_id
-        # Sort by decending
-        quiz_id = models.Quiz.prisma().find_first(
-            order={
-                'quiz_id' : 'desc'
-            }
-        ).quiz_id
-        # Loop to add every question, answer, and type for the quiz
-        for (q, a, qt) in zip(questions, answers, int(question_type)):
-            models.Question.prisma().create(
-                data={
-                    'quiz_id' : quiz_id,
-                    'question' : q,
-                    'type' : qt,
-                }
-            )
-            # Create answers
-            # Get the recently added question to FK answer
-            # sort descending
-            question_id = models.Question.prisma().find_first(
-                order={
-                    'question_id' : 'desc'
-                }
-            ).question_id
-            models.Answer.prisma().create(
-                data={
-                    'question_id' : question_id,
-                    'answer' : a,
-                }
-            )
-    return redirect(url_for('home'))
+        print(quiz_form.data)
+        print(request.form)
+        return redirect(url_for('home'))
+    else:
+        return redirect(url_for('home'))
+    # if 'quiz-form' in request.form and quiz_form.validate_on_submit():
+    #     questions = request.form.getlist('question')
+    #     answers = request.form.getlist('answer')
+    #     question_type = request.form.getlist('question-type')
+    #     # Check if lengths of each form field are equal by comparing each list to the questions list
+    #     info = [questions, answers, question_type]
+    #     if not all([len(x) == len(info[0]) for x in info]):
+    #         flash('The quiz you created was invalid as the amount of questions and answers are not equal')
+    #         return redirect(url_for('quiz_creation'))
+    #     # Create quiz with name and desc
+    #     models.Quiz.prisma().create(
+    #         data={
+    #             'name' : quiz_form.name.data,
+    #             'description' : quiz_form.desc.data,
+    #             'user_id' : int(current_user.user_id)
+    #         }
+    #     )
+    #     # Create questions and answers
+    #     # Get recently added quiz_id
+    #     # Sort by decending
+    #     quiz_id = models.Quiz.prisma().find_first(
+    #         order={
+    #             'quiz_id' : 'desc'
+    #         }
+    #     ).quiz_id
+    #     # Loop to add every question, answer, and type for the quiz
+    #     for (q, a, qt) in zip(questions, answers, int(question_type)):
+    #         models.Question.prisma().create(
+    #             data={
+    #                 'quiz_id' : quiz_id,
+    #                 'question' : q,
+    #                 'type' : qt,
+    #             }
+    #         )
+    #         # Create answers
+    #         # Get the recently added question to FK answer
+    #         # sort descending
+    #         question_id = models.Question.prisma().find_first(
+    #             order={
+    #                 'question_id' : 'desc'
+    #             }
+    #         ).question_id
+    #         models.Answer.prisma().create(
+    #             data={
+    #                 'question_id' : question_id,
+    #                 'answer' : a,
+    #             }
+    #         )
+    # return redirect(url_for('home'))
 
 
 # Attempting a quiz
@@ -216,7 +224,11 @@ def attempt_quiz(quiz_id):
     session['start_time'] = datetime.datetime.now()
     quiz = get_one_quiz(quiz_id)
     # All answers for multi choice questions
-    answers = models.Answer.prisma().find_many()
+    answers = models.Answer.prisma().find_many(
+        where={
+            'quiz_id' : quiz_id,
+        }
+    )
     answers = [x.answer for x in answers]
     print(answers)
     return render_template('attempt_quiz.html', quiz=quiz, answers=answers)

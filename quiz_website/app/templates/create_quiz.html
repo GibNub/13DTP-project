@@ -1,9 +1,11 @@
 {% extends 'layout.html' %}
 {% block content %}
-<script src="{{ url_for('static', filename='quizQuestion.js') }}"></script>
-<button onclick="addQuestion()">Add question</button>
+<script src="{{ url_for('static', filename='quizQuestionTwo.js') }}"></script>
+<button onclick="addQuestion(0)">Add True/False question</button>
+<button onclick="addQuestion(1)">Add written answer question</button>
+<button onclick="addQuestion(2)">Add multiple choice question</button>
 <button onclick="removeLastQuestion()">Remove last question</button>
-<form action="{{ url_for('create_quiz') }}" method="POST">
+<form action="{{ url_for('create_quiz') }}" method="POST" enctype="multipart/form-data">
     {{ quiz_form.csrf_token }}
     Name {{ quiz_form.name }} <br>
     Description {{ quiz_form.desc }} <br>

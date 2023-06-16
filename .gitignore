@@ -154,3 +154,4 @@ cython_debug/
 # Database
 .db
 .vscode
+migrations/

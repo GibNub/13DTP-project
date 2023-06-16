@@ -48,7 +48,7 @@ function addSelectField(fieldName, questionNumber) {
 let questionNumber = 0
 // Adds a new question field (question, answer, and type) to quiz form
 function addQuestion() {
-  const form = document.getElementById('quiz-question');
+  const form = document.getElementById('create-quiz-question');
   const fieldDiv = document.createElement('div');
   setAttr(fieldDiv, {'class' : 'question'});
   fieldDiv.appendChild(addTextField('question', questionNumber))
@@ -62,6 +62,6 @@ function addQuestion() {
 
 // Remove question div
 function removeLastQuestion() {
-  const form = document.getElementById('quiz-question');
+  const form = document.getElementById('create-quiz-question');
   form.removeChild(form.lastElementChild);
 };

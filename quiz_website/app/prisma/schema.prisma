@@ -40,13 +40,20 @@ model Question {
   question    String
   type        Int
   answers     Answer[]
+  falseAnswer FalseAnswer[]
 }
 
 model Answer {
   answer_id   Int      @id @default(autoincrement())
   question    Question @relation(fields: [question_id], references: [question_id])
   question_id Int
-  answer      String 
+  answer      String
+}
+
+model FalseAnswer {
+  false_answer_id Int @id @default(autoincrement())
+  question        Question? @relation(fields: [question_id], references: [question_id])
+  question_id     Int?
 }
 
 model UserScore {
