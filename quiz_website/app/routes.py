@@ -215,7 +215,11 @@ def create_quiz():
 def attempt_quiz(quiz_id):
     session['start_time'] = datetime.datetime.now()
     quiz = get_one_quiz(quiz_id)
-    return render_template('attempt_quiz.html', quiz=quiz)
+    # All answers for multi choice questions
+    answers = models.Answer.prisma().find_many()
+    answers = [x.answer for x in answers]
+    print(answers)
+    return render_template('attempt_quiz.html', quiz=quiz, answers=answers)
 
 
 # Submit quiz attempt
