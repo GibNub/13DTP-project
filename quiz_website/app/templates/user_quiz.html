@@ -1,0 +1,16 @@
+{% extends 'layout.html' %}
+{% block content %}
+<form action="{{ url_for('create', form_type=0) }}" method="POST">
+    {{ quiz_info.csrf_token }}
+    {{ quiz_info.name }}
+    {{ quiz_info.desc }}
+    {{ quiz_info.submit }}
+</form>
+{% for q in user_quizzes %}
+    <a href="{{ url_for('view_one_quiz', quiz_id=q.quiz_id) }}">
+        <div class="quiz">
+            <h2>{{ q.name }}</h2>
+        </div>
+    </a>
+{% endfor %}
+{% endblock %}

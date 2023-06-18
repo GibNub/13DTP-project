@@ -139,36 +139,41 @@ def view_quiz():
 
 
 # View individual quizzes
+# User edits their own quizzes here
 @app.get('/quiz/view/<int:quiz_id>')
 def view_one_quiz(quiz_id):
+    written_form = forms.WrittenQuestion()
+    fact_form = forms.TrueFalseQuestion()
+    multi_choice_form = forms.MultipleChoiceQuestion()
     quiz = get_one_quiz(quiz_id)
-    return render_template('display_one_quiz.html', quiz=quiz, types=QUESTION_TYPES)
+    return render_template('display_one_quiz.html',
+                           quiz=quiz,
+                           types=QUESTION_TYPES,
+                           written_form=written_form,
+                           fact_form=fact_form,
+                           multi_choice_form=multi_choice_form,
+                           )
 
 
-# Pages to create quizzes
-# page to create new quiz
-@app.get('/quiz/create')
+# View and create new quizzes here
+@app.get('/quiz/view/my_quizzes')
 @login_required
 def quiz_creation():
+    user_quizzes = models.Quiz.prisma().find_many(
+        where={
+            'user_id' : int(current_user.user_id)
+        }
+    )
     quiz_info = forms.QuizInfo()
-    quiz_written = forms.WrittenQuestion()
-    quiz_fact = forms.TrueFalseQuestion()
-    quiz_multi = forms.MultipleChoiceQuestion()
-    return render_template(
-        'create_quiz.html',
-        quiz_info=quiz_info,
-        quiz_written=quiz_written,
-        quiz_fact=quiz_fact,
-        quiz_multi=quiz_multi,
-        )
+    return render_template('user_quiz.html', quiz_info=quiz_info, user_quizzes=user_quizzes)
 
 
 # Needs rewriting now
-@app.post('/quiz/create_quiz/<type>')
+@app.post('/quiz/create/<form_type>')
 @login_required
-def create_quiz(type):
+def create(form_type):
     # New Idea : users create one question at a time => easier on backend
-    if type == '0':
+    if form_type == '0':
         form = forms.QuizInfo()
         if 'quiz-info' in request.form and form.validate_on_submit():
             models.Quiz.prisma().create(
@@ -178,9 +183,19 @@ def create_quiz(type):
                     'user_id' : int(current_user.user_id)
                 }
             )
-            return redirect(url_for('home'))
-        else:
-            return redirect(url_for('home'))
+            quiz_create_id = models.Quiz.prisma().find_first(
+                order={
+                    'quiz_id' : 'desc'
+                }
+            ).quiz_id
+            session['current_quiz_id'] = quiz_create_id
+    elif form_type == '1':
+        form = forms.WrittenQuestion()
+        if 'quiz-written' in request.form and form.validate_on_submit():
+            models.Question.prisma().create(
+                data={}
+            )
+    return redirect(url_for('quiz_creation'))
     # if 'quiz-form' in request.form and quiz_form.validate_on_submit():
     #     questions = request.form.getlist('question')
     #     answers = request.form.getlist('answer')
