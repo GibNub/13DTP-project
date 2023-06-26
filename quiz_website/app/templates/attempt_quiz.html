@@ -1,6 +1,7 @@
 {% extends 'layout.html' %}
 {% block content %}
 <div>
+    {{ quiz }}
     <h2>Name : {{ quiz.name }}</h2>
     <p>Description : {{ quiz.desc }}</p>
     <form action="">
@@ -16,7 +17,10 @@
         {# Written type question #}
             <input type="text" name="answer">
         {% elif question.type == 2 %}
-            
+        {# multi choice #}
+        {% for }
+        <label for="one"></label>
+        <input type="radio" name="choice" id="false">
         {% endif %}
     </form>
     {% endfor %}

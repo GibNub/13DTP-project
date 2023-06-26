@@ -2,23 +2,53 @@
 {% block content %}
 {# add quiz form #}
 <script src="{{ url_for('static', filename='quizQuestionThree.js') }}"></script>
+<script>
+    function factQuestion(form) {
+        form.innerHTML =`    
+        {{ fact_form.csrf_token }}
+        {{ fact_form.true_statement }}
+        {{ fact_form.false_statement }}
+        {{ fact_form.submit }}
+        `;
+    };
+    function writtenQuestion(form) {
+        form.innerHTML = `
+        {{ written_form.csrf_token }}
+        {{ written_form.written_question }}
+        {{ written_form.written_answer }}
+        {{ written_form.submit }}
+        `;
+    };
+    function multiChoiceForm(form) {
+        form.innerHTML = `
+        {{ multi_choice_form.csrf_token }}
+        {{ multi_choice_form.multi_question }}
+        {{ multi_choice_form.correct_answer }}
+        {{ multi_choice_form.false_one }}
+        {{ multi_choice_form.false_two }}
+        {{ multi_choice_form.false_three }}
+        {{ multi_choice_form.submit }}
+        `;
+    };
+</script>
 {% if quiz.user_id == current_user.user_id %}
-<button onclick="addQuestion(1)">Add True/False question</button>
-<button onclick="addQuestion(2)">Add written answer question</button>
+<button onclick="addQuestion(1)">Add written answer question</button>
+<button onclick="addQuestion(2)">Add True/False question</button>
 <button onclick="addQuestion(3)">Add multiple choice question</button>
 <div id="create-question">
 
 </div>
+
 {% endif %}
 <div class="one-quiz">
     <h2>Name : {{ quiz.name }}</h2>
-    <p>Description : {{ quiz.desc }}</p>
+    <p>Description : {{ quiz.description }}</p>
     {# loop through all questions in quiz #}
     {% if quiz.questions %}
     {% for question in quiz.questions %}
         <p>Question : {{ question.question }}</p>
         <p>Type : {{ types[question.type] }}</p>
     {% endfor %}
-    {% endif %}
+{% endif %}
 </div>
 {% endblock %}

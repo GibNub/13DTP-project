@@ -6,6 +6,7 @@
     {# quiz info #}
     <a href="{{ url_for('view_one_quiz', quiz_id=quiz.quiz_id) }}">
         <div class="quiz">
+            {{quiz}}
             <h2>Name : {{ quiz.name }}</h2>
             <p>Description : {{ quiz.description }}</p>
             {# loop through all questions in quiz #}
