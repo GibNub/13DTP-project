@@ -11,7 +11,8 @@ function addQuestion(type) {
     const formDiv = document.getElementById("create-question");
     clearQuestion(formDiv);
     const form = document.createElement("form");
-    form.setAttribute("action", `{{ url_for('create', type=${type}) }}`);
+    form.setAttribute("action", `/quiz/create/${type}`)
+    form.setAttribute("method", "POST")
     if (type == 1) {
         writtenQuestion(form)
     } else if (type == 2) {
