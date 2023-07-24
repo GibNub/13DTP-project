@@ -9,9 +9,9 @@ from app.user import UserClass
 
 
 QUESTION_TYPES = {
-        0: 'True/False',
-        1: 'Written',
-        2: 'Multiple choice'
+        1: 'True/False',
+        2: 'Written',
+        3: 'Multiple choice'
     }
 
 
@@ -162,6 +162,7 @@ def view_one_quiz(quiz_id):
                            written_form=written_form,
                            fact_form=fact_form,
                            multi_choice_form=multi_choice_form,
+                           quiz_id=quiz_id
                            )
 
 
@@ -199,7 +200,7 @@ def create(form_type):
                 }
             ).quiz_id
             return redirect(url_for('view_one_quiz', quiz_id=new_quiz_id))
-    
+
     # Check if the current user id is same as author of quiz
     quiz_id = session.get('current_quiz_id', None)
     quiz_user = models.Quiz.prisma().find_first(
@@ -209,10 +210,30 @@ def create(form_type):
     ).user_id
     if quiz_user != int(current_user.user_id):
         return redirect(url_for('view_one_quiz', quiz_id=quiz_id))
-    
+
     # Create new question for specific quiz
-    # Create written answer, add question and answer to database
+    # Create true and false questions for the quiz
     elif form_type == '1':
+        form = forms.TrueFalseQuestion()
+        if 'quiz-fact' in request.form and form.validate_on_submit():
+            # create true statement as question in database
+            models.Question.prisma().create(
+                data={
+                    'quiz_id': quiz_id,
+                    'question': form.fact_statement.data,
+                    'type': int(form_type)
+                }
+            )
+            question_id = get_question_id()
+            models.Answer.prisma().create(
+                data={
+                    'question_id': question_id,
+                    'answer': form.fact_answer.data
+                }
+            )
+
+    # Create written answer, add question and answer to database
+    elif form_type == '2':
         form = forms.WrittenQuestion()
         if 'quiz-written' in request.form and form.validate_on_submit():
             models.Question.prisma().create(
@@ -227,41 +248,6 @@ def create(form_type):
                 data={
                     'question_id': question_id,
                     'answer': form.written_answer.data
-                }
-            )
-
-    # Create true and false questions for the quiz
-    elif form_type == '2':
-        form = forms.TrueFalseQuestion()
-        if 'quiz-fact' in request.form and form.validate_on_submit():
-            # create true statement as question in database
-            models.Question.prisma().create(
-                data={
-                    'quiz_id': quiz_id,
-                    'question': form.true_statement.data,
-                    'type': int(form_type)
-                }
-            )
-            question_id = get_question_id()
-            models.Answer.prisma().create(
-                data={
-                    'question_id': question_id,
-                    'answer': 'True'
-                }
-            )
-            # create false statement as question in database
-            models.Question.prisma().create(
-                data={
-                    'quiz_id': quiz_id,
-                    'question': form.false_statement.data,
-                    'type': int(form_type)
-                }
-            )
-            question_id = get_question_id()
-            models.Answer.prisma().create(
-                data={
-                    'question_id': question_id,
-                    'answer': 'False'
                 }
             )
 
@@ -293,7 +279,7 @@ def create(form_type):
                     }
                 )
     return redirect(url_for('view_one_quiz', quiz_id=quiz_id))
-  
+
 
 # Attempting a quiz
 @app.get('/quiz/attempt/<int:quiz_id>')
@@ -301,13 +287,19 @@ def create(form_type):
 def attempt_quiz(quiz_id):
     session['start_time'] = datetime.datetime.now()
     quiz = get_one_quiz(quiz_id)
+    # Get all the question ids in the current quiz
+    question_ids = []
+    for q in quiz.questions:
+        question_ids.append(q.question_id)
     # Get all answers for multi choice questions
-    answers = models.Answer.prisma().find_many(
+    false_answers = models.FalseAnswer.prisma().find_many(
         where={
-            'quiz_id': quiz_id,
+            'question_id': {'in': question_ids},
         }
     )
-    return render_template('attempt_quiz.html', quiz=quiz, answers=answers)
+    
+    return render_template('attempt_quiz.html',
+                           quiz=quiz,
+                           false_answers=false_answers
+                           )
 
-
-# Submit quiz attempt

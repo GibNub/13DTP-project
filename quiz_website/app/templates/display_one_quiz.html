@@ -1,13 +1,13 @@
 {% extends 'layout.html' %}
 {% block content %}
 {# add quiz form #}
-<script src="{{ url_for('static', filename='quizQuestionThree.js') }}"></script>
+<script src="{{ url_for('static', filename='quizQuestion.js') }}"></script>
 <script>
     function factQuestion(form) {
         form.innerHTML =`    
         {{ fact_form.csrf_token }}
-        {{ fact_form.true_statement }}
-        {{ fact_form.false_statement }}
+        {{ fact_form.fact_statement }}
+        {{ fact_form.fact_answer }}
         {{ fact_form.submit }}
         `;
     };
@@ -32,13 +32,12 @@
     };
 </script>
 {% if quiz.user_id == current_user.user_id %}
-<button onclick="addQuestion(1)">Add written answer question</button>
-<button onclick="addQuestion(2)">Add True/False question</button>
-<button onclick="addQuestion(3)">Add multiple choice question</button>
+    <button onclick="addQuestion(1)">Add True/False question</button>
+    <button onclick="addQuestion(2)">Add written answer question</button>
+    <button onclick="addQuestion(3)">Add multiple choice question</button>
 
-<div id="create-question">
-
-</div>
+    <div id="create-question">
+    </div>
 
 {% endif %}
 <div class="one-quiz">
@@ -52,4 +51,7 @@
     {% endfor %}
 {% endif %}
 </div>
+<form action="{{ url_for('attempt_quiz', quiz_id=quiz_id) }}">
+    <input type="submit" value="Start quiz">
+</form>
 {% endblock %}

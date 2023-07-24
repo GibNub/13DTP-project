@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, EmailField, BooleanField
+from wtforms import StringField, PasswordField, SubmitField, EmailField, BooleanField, RadioField
 from wtforms.validators import DataRequired
 
 
@@ -32,8 +32,8 @@ class WrittenQuestion(FlaskForm):
 
 
 class TrueFalseQuestion(FlaskForm):
-    true_statement = StringField('True', validators=[DataRequired()], render_kw={'placeholder' : 'True statement'})
-    false_statement = StringField('False', validators=[DataRequired()], render_kw={'placeholder' : 'False statement'})
+    fact_statement = StringField('Statement', validators=[DataRequired()], render_kw={'placeholder' : 'Statement'})
+    fact_answer = RadioField('Answer', choices=[('true', 'True'), ('false', 'False')] , validators=[DataRequired()])
     submit = SubmitField('Create', name='quiz-fact', id='quiz-fact')
 
 

@@ -1,28 +1,37 @@
 {% extends 'layout.html' %}
 {% block content %}
+<script src="{{ url_for('static', filename='randomizeMultichoice.js') }}"></script>
 <div>
-    {{ quiz }}
     <h2>Name : {{ quiz.name }}</h2>
     <p>Description : {{ quiz.desc }}</p>
     <form action="">
     {% for question in quiz.questions %}
-    <p>{{ question.question }}</p>
-        {% if question.type == 0 %}
+        <p>{{ question.question }}</p>
+        {% if question.type == 1 %}
             {# true false question #}
-            <label for="true">True</label>
-            <input type="radio" name="choice" id="true">
-            <label for="false">False</label>
-            <input type="radio" name="choice" id="false">
-        {% elif question.type == 1 %}
-        {# Written type question #}
-            <input type="text" name="answer">
+            <label for="true-{{ question.question_id }}">True</label>
+            <input type="radio" name="true-{{ question.question_id }}" value="{{ question.answers[0].answer }}" id="true-{{ question.question_id }}">
+            <label for="false-{{ question.id }}">False</label>
+            <input type="radio" name="false-{{ question.question_id }}" value="{{ question.answers[0].answer }}" id="false-{{ question.question_id }}">
         {% elif question.type == 2 %}
-        {# multi choice #}
-        {% for }
-        <label for="one"></label>
-        <input type="radio" name="choice" id="false">
+            {# Written type question #}
+            <input type="text" name="written-{{ question.question_id }}">
+        {% elif question.type == 3 %}
+            {# multi choice #}
+            <div id="{{ question.question_id }}">
+                <label for="{{ question.answers[0].answer }}">{{ question.answers[0].answer }}</label>
+                <input type="radio" name="multi-{{ question.question_id }}" value="{{ question.answers[0].answer }}" id="{{ question.answers[0].answer }}">
+                {# false statements #}
+                {% for f in false_answers %}
+                    {% if f.question_id == question.question_id %}
+                        <label for="multi-{{ f.answer }}">{{ f.answer }}</label>
+                        <input type="radio" name="multi-{{ question.question_id }}" value="{{ f.answer }}" id="{{ f.answer }}">
+                    {% endif %}
+                {% endfor %}
+            </div>
         {% endif %}
-    </form>
     {% endfor %}
+    <input type="submit" value="Submit">
+    </form>
 </div>
 {% endblock %}
