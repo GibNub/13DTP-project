@@ -1,4 +1,5 @@
-import datetime
+from time import time
+from math import sqrt, floor
 from flask import render_template, url_for, flash, redirect, request, session
 from flask_login import login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -13,6 +14,9 @@ QUESTION_TYPES = {
         2: 'Written',
         3: 'Multiple choice'
     }
+
+
+MAX_SCORE = 1000
 
 
 def get_one_quiz(quiz_id):
@@ -285,7 +289,7 @@ def create(form_type):
 @app.get('/quiz/attempt/<int:quiz_id>')
 @login_required
 def attempt_quiz(quiz_id):
-    session['start_time'] = datetime.datetime.now()
+    session['start_time'] = time()
     quiz = get_one_quiz(quiz_id)
     # Get all the question ids in the current quiz
     question_ids = []
@@ -303,3 +307,49 @@ def attempt_quiz(quiz_id):
                            false_answers=false_answers
                            )
 
+# Submit quiz attempt and store score
+@app.post('/quiz/attempt/<int:quiz_id>/submit')
+@login_required
+def submit_quiz(quiz_id):
+    time_now = time()
+    user_answers = request.form
+    quiz = get_one_quiz(quiz_id)
+    # Define points per question (ppq) out of 1000 points
+    ppq = MAX_SCORE / len(quiz.questions)
+    # Check if each answer is correct or incorrect, then increment amount correct by one
+    correct_count = 0
+    for question in quiz.questions:
+        if user_answers[str(question.question_id)] == question.answers[0].answer:
+            correct_count += 1
+
+    # Calculate final score
+    final_score = floor((correct_count * ppq * sqrt(time_now - session.get('start_time'))) / (12))
+    print(final_score)
+    # Submit score in database
+    models.UserScore.prisma().create(
+        data={
+            'quiz_id': quiz.quiz_id,
+            'user_id': int(current_user.user_id),
+            'score': final_score,
+        }
+    )
+    return redirect(url_for('home'))
+
+@app.get('/user/<int:user_id>')
+def user_page(user_id):
+    user_profile = models.User.prisma().find_first(
+        where={
+            'user_id': user_id
+        },
+        include={
+            'quizzes': True,
+            'quiz_score': True
+        }
+    )
+    print(user_profile)
+    user_quizzes = models.Quiz.prisma().find_many(
+        where={
+            'user_id': user_id
+        }
+    )
+    return render_template('user.html')
