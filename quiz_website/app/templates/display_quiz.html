@@ -1,18 +1,20 @@
 {% extends 'layout.html' %}
 {% block content %}
 {# loop through all quizzes #}
-<div class="view-quiz">
+<div class="quiz-container">
     {% for quiz in quiz %}
     {# quiz info #}
     <a href="{{ url_for('view_one_quiz', quiz_id=quiz.quiz_id) }}">
         <div class="quiz">
-            <h2>Name : {{ quiz.name }}</h2>
-            <p>Description : {{ quiz.description }}</p>
+            <h2>{{ quiz.name }}</h2>
+            <p>{{ quiz.description }}</p>
             {# loop through all questions in quiz #}
             {% if quiz.questions %}
                 {% for question in quiz.questions %}
-                    <p>Question : {{ question.question }}</p>
-                    <p>Type : {{ types[question.type] }}</p>
+                    <div class="question">
+                        <h3>{{ question.question }}</h3>
+                        <p>{{ types[question.type] }}</p>
+                    </div>
                 {% endfor %}
             {% endif %}
         {% endfor %}

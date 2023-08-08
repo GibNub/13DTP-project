@@ -1,20 +1,27 @@
 {% extends 'layout.html' %}
 {% block content %}
-<p>Sign Up</p>
-<form method="POST" action="{{ url_for('account_signup') }}">
-    {{ signup_form.csrf_token }}
-    {{ signup_form.signup_username }}
-    {{ signup_form.signup_email }}
-    {{ signup_form.signup_password }}
-    {{ signup_form.submit }}
-</form>
-<p>Login</p>
-<form method="POST" action="{{ url_for('account_login') }}">
-    {{ login_form.csrf_token }}
-    {{ login_form.login_username }}
-    {{ login_form.login_password }}
-    {{ login_form.remember.label }}
-    {{ login_form.remember }}
-    {{ login_form.submit }}
-</form>
+<div class="acc-manage-container">
+    <div class="signup">
+        <p>Sign Up</p>
+        <form method="POST" action="{{ url_for('account_signup') }}">
+            {{ signup_form.csrf_token }}
+            {{ signup_form.signup_username }}
+            {{ signup_form.signup_email }}
+            {{ signup_form.signup_password }}
+            {{ signup_form.submit }}
+        </form>
+    </div>
+    <div class="login">
+        <p>Login</p>
+        <form method="POST" action="{{ url_for('account_login') }}">
+            {{ login_form.csrf_token }}
+            {{ login_form.login_username }}
+            {{ login_form.login_password }}<br>
+            {{ login_form.remember.label }}
+            {{ login_form.remember }}
+            {{ login_form.submit }}
+        </form>
+    </div>
+</div>
+
 {% endblock %}

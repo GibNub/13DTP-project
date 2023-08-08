@@ -1,4 +1,17 @@
 {% extends 'layout.html' %}
 {% block content %}
-Account Page
+{{ user.username }}
+
+<p>Quizzes:</p>
+<li>
+{% for q in user.quizzes %}
+    <li>
+        <p>{{ q.name }}</p>
+        <p>{{ q.desc }}</p>
+    </li>
+{% endfor %}
+</li>
+
+
+<p>Scores</p>
 {% endblock %}
