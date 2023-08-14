@@ -10,16 +10,18 @@
             <p>{{ quiz.description }}</p>
             {# loop through all questions in quiz #}
             {% if quiz.questions %}
-                {% for question in quiz.questions %}
-                    <div class="question">
-                        <h3>{{ question.question }}</h3>
-                        <p>{{ types[question.type] }}</p>
-                    </div>
-                {% endfor %}
+                <div class="quiz-questions">
+                    {% for question in quiz.questions %}
+                        <div class="question">
+                            <p>Example questions</p>
+                            <p>Type:{{ types[question.type] }}</p>
+                            <p>{{ question.question }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
             {% endif %}
-        {% endfor %}
         </div>
     </a>
-    
+    {% endfor %}
 </div>
 {% endblock %}

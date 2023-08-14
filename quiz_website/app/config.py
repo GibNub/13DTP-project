@@ -4,8 +4,9 @@ from datetime import timedelta
 
 
 # Flask
-SECRET_KEY = environments.SECRET_KEY
 SESSION_COOKIE_NAME = 'QuizMeSession'
+SECRET_KEY = environments.SECRET_KEY
+TOKEN_SALT = environments.TOKEN_SALT
 FLASK_DEBUG = 1
 
 # Flask-Login

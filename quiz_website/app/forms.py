@@ -8,6 +8,7 @@ class SignUp(FlaskForm):
     signup_username = StringField('Username', validators=[DataRequired()], render_kw={'placeholder' : 'Username'})
     signup_email = EmailField('Email', validators=[DataRequired()], render_kw={'placeholder' : 'Email'})
     signup_password = PasswordField('Password', validators=[DataRequired()], render_kw={'placeholder' : 'Password'})
+    signup_password_confirm = PasswordField('ConfirmPassword', validators=[DataRequired()], render_kw={'placeholder' : 'Confirm password'})
     submit = SubmitField('Signup', name='signup-form', id='signup-form')
 
 

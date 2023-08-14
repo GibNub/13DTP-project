@@ -91,6 +91,11 @@ def account_signup():
     if 'signup-form' in request.form and signup_form.validate_on_submit():
         username = signup_form.signup_username.data
         email = signup_form.signup_email.data
+        password = signup_form.signup_password
+        confirm_pass = signup_form.signup_password_confirm
+        # Check if passwords match
+        if password != confirm_pass:
+            return redirect(url_for('account'))
         # Hash password and store user data
         password_hash = generate_password_hash(signup_form.signup_password.data, salt_length=16)
         models.User.prisma().create(
@@ -125,7 +130,7 @@ def account_login():
                 login_user(user, remember=remember)
             else:
                 flash('Username or password is incorrect')
-    return redirect(url_for('account'))
+    return redirect(url_for('home'))
 
 
 # Settings page

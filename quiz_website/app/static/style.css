@@ -73,10 +73,10 @@ h1 {
     margin-right: 20px;
     margin-left: 20px;
     display: grid;
-    grid-template-columns: 500px 100px;
     justify-content: start;
+    grid-template-columns: max-content max-content;
     row-gap: 50px;
-    column-gap: 300px;
+    column-gap: 30px;
 }
 
 
@@ -86,6 +86,17 @@ h1 {
     padding: 10px;
 }
 
+.quiz-questions {
+    display: flex;
+}
+
+
+.quiz-questions .question {
+    margin: 10px;
+    background-color: var(--background-colour);
+    padding: 7px 15px;
+    border-radius: 5px;
+}
 
 .quiz > * {
     margin: 10px;
@@ -96,29 +107,75 @@ h2 {
     font-size: 2em;
 }
 
-.quiz > .question {
-    background-color: var(--background-colour);
-    padding: 7px 15px;
-    border-radius: 5px;
-}
-
-
 /* Acc manage page */
 .acc-manage-container {
     display: flex;
     padding: 0;
-    margin: 0;
     justify-content: center;
     align-items: center;
     flex-direction: column;
 }
 
-.acc-manage-container > * {
-    width: 800px;
+.acc-manage-container > div {
+    background-color: var(--layer-background-colour);
+    width: 500px;
+    padding: 20px 30px;
+    border-radius: 20px;
+    margin: 20px 0;
 }
 
-.acc-manage-container input {
-    width: 90%;
-    height: 40px;
-    margin: 5px 0;
+.acc-form > p {
+    font-size: 3em;
+    margin: 10px 0;
 }
+
+
+
+.acc-manage-container input {
+    background-color: #2e2e2e;
+    color: white;
+    font-size: 1.8em;
+    font-family: inherit;
+    width: 100%;
+    height: 50px;
+    box-sizing: border-box;
+    margin: 5px 0;
+    border: 2px solid var(--accent-colour);
+    border-radius: 10px;
+}
+
+.acc-manage-container label {
+    font-size: 1.8em;
+}
+
+.remember {
+    display: flex;
+    align-items: center;
+}
+
+.remember input {
+    margin: 5px 0 5px 20px;
+    color: var(--background-colour);
+}
+
+::placeholder {
+    color: #cccccc;
+}
+
+::-webkit-input-placeholder {
+    color: #cccccc;
+}
+
+:-moz-placeholder {    
+    color: #cccccc;
+}
+
+::-moz-placeholder {
+    color: #cfcccc;
+}
+
+.acc-manage-container input[type=checkbox] {
+    width: 30px;
+    height: 30px;
+}
+
