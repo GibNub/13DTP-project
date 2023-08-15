@@ -5,3 +5,4 @@ load_dotenv()
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 TOKEN_SALT = os.getenv('TOKEN_SALT')
+MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')

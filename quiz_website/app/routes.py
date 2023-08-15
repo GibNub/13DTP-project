@@ -7,6 +7,8 @@ from prisma import models
 
 from app import forms, login_manager, app
 from app.user import UserClass
+from app.email import send_email
+from app.token_id import generate_token, confirm_token
 
 
 QUESTION_TYPES = {
@@ -91,10 +93,13 @@ def account_signup():
     if 'signup-form' in request.form and signup_form.validate_on_submit():
         username = signup_form.signup_username.data
         email = signup_form.signup_email.data
-        password = signup_form.signup_password
-        confirm_pass = signup_form.signup_password_confirm
+        password = signup_form.signup_password.data
+        confirm_pass = signup_form.signup_password_confirm.data
         # Check if passwords match
         if password != confirm_pass:
+            print(password)
+            print(confirm_pass)
+            print('not match')
             return redirect(url_for('account'))
         # Hash password and store user data
         password_hash = generate_password_hash(signup_form.signup_password.data, salt_length=16)
@@ -103,10 +108,47 @@ def account_signup():
                 'username': username,
                 'email': email,
                 'password_hash': password_hash,
+                'confirmed': False,
             }
         )
+        token = generate_token(email)
+        confirm_url = url_for('confirm_email', token=token, _external=True)
+        template = render_template('email.html', confirm=confirm_url)
+        send_email(email, subject='Confirm email', template=template)
     return redirect(url_for('account'))
 
+
+# Pre-confirmation page
+@app.get('/account/unconfirmed')
+def unconfirmed():
+    return render_template('confirm.html')
+
+
+# Confirm user with token
+@app.get('/account/confirm/token')
+def confirm_email(token):
+    try:
+        email = confirm_token(token)
+    except:
+        print('invalid')
+    user_data = models.User.prisma().find_first(
+        where={
+            'email': email,
+        }
+    )
+    user = UserClass(user_data.__dict__)
+    if user.confirmed:
+        print('already confirmed')
+    else:
+        models.User.prisma().update(
+            where={
+                'username': session.get('username')
+            },
+            data={
+                'confirmed': True
+            }
+        )
+    return redirect(url_for('home'))
 
 # Login user if creds are valid
 @app.post('/account/login')
@@ -123,13 +165,19 @@ def account_login():
         )
         if not user_data:
             flash('User does not exist')
-        else:
-            user = UserClass(user_data.__dict__)
-            # Check usernames and passwords
-            if check_password_hash(user.password, password):
+            return redirect(url_for('account'))
+        user = UserClass(user_data.__dict__)
+        # Check usernames and passwords
+        if check_password_hash(user.password, password):
+            # Check if user is confirmed first
+            if user.confirmed:
+                session['username'] = None
                 login_user(user, remember=remember)
             else:
-                flash('Username or password is incorrect')
+                session['username'] = user.username
+                return redirect(url_for('unconfirmed'))
+        else:
+            flash('Username or password is incorrect')
     return redirect(url_for('home'))
 
 

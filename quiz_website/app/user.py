@@ -7,6 +7,7 @@ class UserClass(UserMixin):
         self.username = user_data['username']
         self.password = user_data['password_hash']
         self.admin = user_data['admin']
+        self.confirmed = user_data['confirmed']
     
     def get_id(self):
         return self.user_id
