@@ -4,24 +4,24 @@
 <div class="quiz-container">
     {% for quiz in quiz %}
     {# quiz info #}
-    <a href="{{ url_for('view_one_quiz', quiz_id=quiz.quiz_id) }}">
-        <div class="quiz">
-            <h2>{{ quiz.name }}</h2>
-            <p>{{ quiz.description }}</p>
-            {# loop through all questions in quiz #}
-            {% if quiz.questions %}
+    {% if quiz.questions|length > 0 %}
+        <a href="{{ url_for('view_one_quiz', quiz_id=quiz.quiz_id) }}">
+            <div class="quiz">
+                <h2>{{ quiz.name }}</h2>
+                <p>{{ quiz.description }}</p>
+                {# loop through all questions in quiz #}
+                <h3>Sample questions</h3>
                 <div class="quiz-questions">
                     {% for question in quiz.questions %}
-                        <div class="question">
-                            <p>Example questions</p>
-                            <p>Type:{{ types[question.type] }}</p>
-                            <p>{{ question.question }}</p>
-                        </div>
-                    {% endfor %}
+                    <div class="question">
+                        <p>Type:{{ types[question.type] }}</p>
+                        <p>{{ question.question }}</p>
+                    </div>
+                {% endfor %}
                 </div>
-            {% endif %}
-        </div>
-    </a>
+            </div>
+        </a>
+    {% endif %}
     {% endfor %}
 </div>
 {% endblock %}

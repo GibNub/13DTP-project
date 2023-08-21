@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, EmailField, BooleanField, RadioField
+from wtforms import StringField, PasswordField, SubmitField, EmailField, BooleanField, RadioField, TextAreaField
 from wtforms.validators import DataRequired
 
 
@@ -22,7 +22,7 @@ class Login(FlaskForm):
 # Quizzes
 class QuizInfo(FlaskForm):
     name = StringField('Quiz name', validators=[DataRequired()], render_kw={'placeholder' : 'Quiz name'})
-    desc = StringField('Quiz description', validators=[DataRequired()], render_kw={'placeholder' : 'Quiz description'})
+    desc = TextAreaField('Quiz description', validators=[DataRequired()], render_kw={'placeholder' : 'Quiz description'})
     submit = SubmitField('Create', name='quiz-info', id='quiz-info')
 
 

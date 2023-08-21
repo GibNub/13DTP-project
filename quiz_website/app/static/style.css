@@ -3,19 +3,20 @@
     --accent-colour: #B7D5D4;
     --layer-background-colour: #488286;
     --button-colour: #305252;
+    --dark-gray: #2e2e2e;
 }
 
+textarea {
+    resize: none;
+}
 
 /* Main page */
 body {
     margin: 0;
     background-color: var(--background-colour);
     color: white;
-    font-size: 11px;
-}
-
-h1 {
     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-size: 11px;
 }
 
 a {
@@ -62,7 +63,6 @@ nav a {
 h1 {
     font-size: 10em;
     text-align: center;
-
 }
 
 
@@ -74,7 +74,9 @@ h1 {
     margin-left: 20px;
     display: grid;
     justify-content: start;
-    grid-template-columns: max-content max-content;
+    grid-template-columns: repeat(4, 25%);
+    grid-template-rows: auto;
+    justify-self: center;
     row-gap: 50px;
     column-gap: 30px;
 }
@@ -87,7 +89,9 @@ h1 {
 }
 
 .quiz-questions {
-    display: flex;
+    display: grid;
+    grid-template-columns: 30% 30% 30%;
+    grid-template-rows: auto;
 }
 
 
@@ -177,5 +181,83 @@ h2 {
 .acc-manage-container input[type=checkbox] {
     width: 30px;
     height: 30px;
+}
+
+
+/* User quizzes */
+/* Create quiz form */
+.create-quiz-form {
+    margin: 20px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}   
+
+
+.create-quiz-form > * {
+    background-color: var(--layer-background-colour);
+    margin: 0;
+    padding: 20px;
+    width: 40%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.create-quiz-form input, textarea {
+    border: none;
+    margin: 5px 0;
+    padding: 20px 5px;
+    background-color: var(--dark-gray);
+    width: 100%;
+    color: white;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+
+.create-quiz-form textarea {
+    height: 200px;
+    resize: none;
+}
+
+
+/* quiz list */
+.user-quiz {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: column;
+}
+
+
+.user-quiz > * {
+    width: 60%;
+    margin: 20px 0;
+}
+
+
+/* Viewing individual quizzes */
+.edit-quiz {
+    margin: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+
+.edit-quiz button {
+    width: 30%;
+    border: none;
+    padding: 20px 105px;
+    margin: 10px;
+}
+
+
+.edit-quiz button:hover {
+    cursor: pointer;
 }
 

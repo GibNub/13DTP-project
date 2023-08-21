@@ -111,11 +111,11 @@ def account_signup():
                 'confirmed': False,
             }
         )
-        token = generate_token(email)
-        confirm_url = url_for('confirm_email', token=token, _external=True)
-        template = render_template('email.html', confirm=confirm_url)
-        send_email(email, subject='Confirm email', template=template)
     return redirect(url_for('account'))
+    token = generate_token(email)
+    confirm_url = url_for('confirm_email', token=token, _external=True)
+    template = render_template('email.html', confirm=confirm_url)
+    send_email(email, subject='Confirm email', template=template)
 
 
 # Pre-confirmation page
@@ -174,8 +174,10 @@ def account_login():
                 session['username'] = None
                 login_user(user, remember=remember)
             else:
-                session['username'] = user.username
-                return redirect(url_for('unconfirmed'))
+                session['username'] = None
+                login_user(user, remember=remember)
+                # session['username'] = user.username
+                # return redirect(url_for('unconfirmed'))
         else:
             flash('Username or password is incorrect')
     return redirect(url_for('home'))
