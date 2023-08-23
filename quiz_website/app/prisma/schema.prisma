@@ -63,6 +63,7 @@ model UserScore {
   quiz        Quiz @relation(fields: [quiz_id], references: [quiz_id])
   quiz_id     Int
   score       Int
+  time        Int
 
   @@id([user_id, quiz_id])
 }

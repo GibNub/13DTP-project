@@ -10,7 +10,7 @@ TOKEN_SALT = environments.TOKEN_SALT
 FLASK_DEBUG = 1
 
 # Flask-Login
-REMEMBER_COOKIE_DURATION = timedelta(days=30)
+REMEMBER_COOKIE_DURATION = timedelta(days=14)
 
 # Flask-Mail
 DEFAULT_MAIL_SENDER = 'noreplyquizmecomfirmation@gmail.com'

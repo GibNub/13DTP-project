@@ -86,12 +86,17 @@ h1 {
     background-color: #488286;
     border-radius: 8px;
     padding: 10px;
+    height: 300px;
+    overflow: hidden;
 }
+
 
 .quiz-questions {
     display: grid;
-    grid-template-columns: 30% 30% 30%;
+    grid-template-columns: repeat(3, 33.33%);
     grid-template-rows: auto;
+    overflow: hidden;
+
 }
 
 
@@ -100,6 +105,7 @@ h1 {
     background-color: var(--background-colour);
     padding: 7px 15px;
     border-radius: 5px;
+    text-overflow: ellipsis;
 }
 
 .quiz > * {
@@ -132,7 +138,6 @@ h2 {
     font-size: 3em;
     margin: 10px 0;
 }
-
 
 
 .acc-manage-container input {
@@ -240,6 +245,31 @@ h2 {
 
 
 /* Viewing individual quizzes */
+
+.display-one-quiz .quiz-info {grid-area: info;}
+.display-one-quiz .attempt {grid-area: attempt-button;}
+.display-one-quiz .questions {grid-area: questions;}
+
+.display-one-quiz {
+    display: grid;
+    grid-template-areas: 
+    'info info attempt-button'
+    'board questions questions'
+    'board edit edit';
+}
+
+.display-one-quiz .questions {
+    display: grid;
+    grid-template-columns: repeat(4, 25%);
+}
+
+
+.display-one-quiz .question {
+    background-color: var(--layer-background-colour);
+    margin: 15px;
+}
+
+
 .edit-quiz {
     margin: 30px;
     display: flex;
@@ -249,8 +279,11 @@ h2 {
 }
 
 
+
+
 .edit-quiz button {
-    width: 30%;
+    background-color: var(--layer-background-colour);
+    width: 50%;
     border: none;
     padding: 20px 105px;
     margin: 10px;
@@ -260,4 +293,16 @@ h2 {
 .edit-quiz button:hover {
     cursor: pointer;
 }
+
+
+/* Input field styles */
+input:focus {
+    outline: none;
+}
+
+
+input:hover[type=submit] {
+    cursor: pointer;
+}
+/* Remove white background on form autofill */
 

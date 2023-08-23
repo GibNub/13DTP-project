@@ -31,28 +31,36 @@
         `;
     };
 </script>
-{% if quiz.user_id == current_user.user_id %}
-<div class="edit-quiz">
-    <button onclick="addQuestion(1)">Add True/False question</button>
-    <button onclick="addQuestion(2)">Add written answer question</button>
-    <button onclick="addQuestion(3)">Add multiple choice question</button>
-
-    <div id="create-question">
+<div class="display-one-quiz">
+    <div class="quiz-info">
+        <h2>Name : {{ quiz.name }}</h2>
+        <p>Description : {{ quiz.description }}</p>
     </div>
+    <div class="attempt-button">
+        <form action="{{ url_for('attempt_quiz', quiz_id=quiz_id) }}">
+            <input type="submit" value="Start quiz">
+        </form>
+    </div>
+    <div class="questions">
+        {# loop through all questions in quiz #}
+        {% if quiz.questions %}
+            {% for question in quiz.questions %}
+                <div class="question">
+                    <p>Question : {{ question.question }}</p>
+                    <p>Type : {{ types[question.type] }}</p>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+    {% endblock %}
+    {% if quiz.user_id == current_user.user_id %}
+    <div class="edit-quiz">
+        <button onclick="addQuestion(1)">Add True/False question</button>
+        <button onclick="addQuestion(2)">Add written answer question</button>
+        <button onclick="addQuestion(3)">Add multiple choice question</button>
+    
+        <div id="create-question">
+        </div>
+    </div>
+    {% endif %}
 </div>
-{% endif %}
-<div class="one-quiz">
-    <h2>Name : {{ quiz.name }}</h2>
-    <p>Description : {{ quiz.description }}</p>
-    {# loop through all questions in quiz #}
-    {% if quiz.questions %}
-    {% for question in quiz.questions %}
-        <p>Question : {{ question.question }}</p>
-        <p>Type : {{ types[question.type] }}</p>
-    {% endfor %}
-{% endif %}
-</div>
-<form action="{{ url_for('attempt_quiz', quiz_id=quiz_id) }}">
-    <input type="submit" value="Start quiz">
-</form>
-{% endblock %}

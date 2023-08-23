@@ -216,14 +216,17 @@ def view_one_quiz(quiz_id):
     multi_choice_form = forms.MultipleChoiceQuestion()
     quiz = get_one_quiz(quiz_id)
     session['current_quiz_id'] = quiz_id
-    return render_template('display_one_quiz.html',
-                           quiz=quiz,
-                           types=QUESTION_TYPES,
-                           written_form=written_form,
-                           fact_form=fact_form,
-                           multi_choice_form=multi_choice_form,
-                           quiz_id=quiz_id
-                           )
+    if not quiz:
+        print('404')
+    else:
+        return render_template('display_one_quiz.html',
+                                quiz=quiz,
+                                types=QUESTION_TYPES,
+                                written_form=written_form,
+                                fact_form=fact_form,
+                                multi_choice_form=multi_choice_form,
+                                quiz_id=quiz_id
+                                )
 
 
 # View and create new quizzes here
@@ -233,10 +236,13 @@ def quiz_creation():
     user_quizzes = models.Quiz.prisma().find_many(
         where={
             'user_id': int(current_user.user_id)
+        },
+        include={
+            'questions': True
         }
     )
     quiz_info = forms.QuizInfo()
-    return render_template('user_quiz.html', quiz_info=quiz_info, user_quizzes=user_quizzes)
+    return render_template('user_quiz.html', quiz_info=quiz_info, user_quizzes=user_quizzes, types=QUESTION_TYPES)
 
 
 # Create new quiz and questions for that quiz
@@ -384,19 +390,16 @@ def submit_quiz(quiz_id):
             if user_answers[str(question.question_id)] == question.answers[0].answer:
                 correct_count += 1
 
-        # Calculate final score
+        # Calculate final score and time
         delta_time = time_now - session.get('start_time')
-        # Prevent division errors, negative numbers
-        if delta_time <= 0:
-            delta_time = 1
-        final_score = floor((correct_count * ppq * sqrt(delta_time)) / (12))
-        print(final_score)
+        final_score = floor(correct_count * ppq)
         # Submit score in database
         models.UserScore.prisma().create(
             data={
                 'quiz_id': quiz.quiz_id,
                 'user_id': int(current_user.user_id),
                 'score': final_score,
+                'time': int(delta_time)
             }
         )
         return redirect(url_for('home'))
