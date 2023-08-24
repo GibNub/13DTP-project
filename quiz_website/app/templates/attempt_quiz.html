@@ -10,22 +10,22 @@
         {% if question.type == 1 %}
             {# true false question #}
             <label for="true-{{ question.question_id }}">True</label>
-            <input type="radio" name="{{ question.question_id }}" value="True" id="true-{{ question.question_id }}">
+            <input type="radio" name="{{ question.question_id }}" value="True" id="true-{{ question.question_id }}" required>
             <label for="false-{{ question.id }}">False</label>
-            <input type="radio" name="{{ question.question_id }}" value="False" id="false-{{ question.question_id }}">
+            <input type="radio" name="{{ question.question_id }}" value="False" id="false-{{ question.question_id }}" required>
         {% elif question.type == 2 %}
             {# Written type question #}
-            <input type="text" name="{{ question.question_id }}">
+            <input type="text" name="{{ question.question_id }}" required>
         {% elif question.type == 3 %}
             {# multi choice #}
             <div id="{{ question.question_id }}">
                 <label for="{{ question.answers[0].answer }}">{{ question.answers[0].answer }}</label>
-                <input type="radio" name="{{ question.question_id }}" value="{{ question.answers[0].answer }}" id="{{ question.answers[0].answer }}">
+                <input type="radio" name="{{ question.question_id }}" value="{{ question.answers[0].answer }}" id="{{ question.answers[0].answer }}" required>
                 {# false statements #}
                 {% for f in false_answers %}
                     {% if f.question_id == question.question_id %}
                         <label for="multi-{{ f.answer }}">{{ f.answer }}</label>
-                        <input type="radio" name="{{ question.question_id }}" value="{{ f.answer }}" id="{{ f.answer }}">
+                        <input type="radio" name="{{ question.question_id }}" value="{{ f.answer }}" id="{{ f.answer }}" required>
                     {% endif %}
                 {% endfor %}
             </div>

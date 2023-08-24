@@ -26,7 +26,13 @@ def get_one_quiz(quiz_id):
         include={
             'questions': {
                 'include': {
-                    'answers': True
+                    'answers': True,
+                    'falseAnswer': True,
+                }
+            },
+            'user_score':  {
+                'include': {
+                    'user': True,
                 }
             }
         },
@@ -97,9 +103,6 @@ def account_signup():
         confirm_pass = signup_form.signup_password_confirm.data
         # Check if passwords match
         if password != confirm_pass:
-            print(password)
-            print(confirm_pass)
-            print('not match')
             return redirect(url_for('account'))
         # Hash password and store user data
         password_hash = generate_password_hash(signup_form.signup_password.data, salt_length=16)
@@ -149,6 +152,7 @@ def confirm_email(token):
             }
         )
     return redirect(url_for('home'))
+
 
 # Login user if creds are valid
 @app.post('/account/login')
@@ -215,6 +219,20 @@ def view_one_quiz(quiz_id):
     fact_form = forms.TrueFalseQuestion()
     multi_choice_form = forms.MultipleChoiceQuestion()
     quiz = get_one_quiz(quiz_id)
+
+    # Generate the leaderboard
+    scores = models.UserScore.prisma().find_many(
+        where={
+            'quiz_id': quiz_id,
+        },
+        include={
+            'user': True
+        }
+    )
+
+    # Get scores and times on list
+    scores = [(s.score, s.time, s.user.username) for s in scores]
+    scores.sort()    
     session['current_quiz_id'] = quiz_id
     if not quiz:
         print('404')
@@ -337,7 +355,7 @@ def create(form_type):
                     'answer': form.correct_answer.data
                 }
             )
-            # Create false answers in the database
+            # Create false answers in the database if question is multichoice
             for answer in [form.false_one.data, form.false_two.data, form.false_three.data]:
                 models.FalseAnswer.prisma().create(
                     data={
@@ -384,6 +402,10 @@ def submit_quiz(quiz_id):
         quiz = get_one_quiz(quiz_id)
         # Define points per question (ppq)
         ppq = MAX_SCORE / len(quiz.questions)
+        # Validate submitted attempt
+        if len(quiz.questions) != len(user_answers):
+            flash('The submitted attempt is not valid', 'error')
+            return redirect(url_for('view_one_quiz', quiz_id=quiz_id))
         # Check if each answer is correct or incorrect, then increment amount correct by one
         correct_count = 0
         for question in quiz.questions:
@@ -418,3 +440,10 @@ def user_page(user_id):
         }
     )
     return render_template('user.html', user=user)
+
+
+# 404 error
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404

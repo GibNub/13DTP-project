@@ -18,7 +18,7 @@
                 <div class="quiz-questions">
                     {% for question in q.questions %}
                     <div class="question">
-                        <p>Type:{{ types[question.type] }}</p>
+                        <p>{{ types[question.type] }} question</p>
                         <p>{{ question.question }}</p>
                     </div>
                     {% endfor %}

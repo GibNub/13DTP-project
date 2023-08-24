@@ -33,34 +33,53 @@
 </script>
 <div class="display-one-quiz">
     <div class="quiz-info">
-        <h2>Name : {{ quiz.name }}</h2>
-        <p>Description : {{ quiz.description }}</p>
+        <h2>{{ quiz.name }}</h2>
+        <p>{{ quiz.description }}</p>
     </div>
     <div class="attempt-button">
         <form action="{{ url_for('attempt_quiz', quiz_id=quiz_id) }}">
             <input type="submit" value="Start quiz">
         </form>
     </div>
+    <div class="leaderboard">
+        <h3>Leaderboard</h3>
+        {% for u in quiz.user_score %}
+            {{ u.user.username }}
+            {{ u.score }}
+            {{ u.time }}
+        {% endfor %}
+    </div>
     <div class="questions">
         {# loop through all questions in quiz #}
         {% if quiz.questions %}
-            {% for question in quiz.questions %}
-                <div class="question">
-                    <p>Question : {{ question.question }}</p>
-                    <p>Type : {{ types[question.type] }}</p>
-                </div>
-            {% endfor %}
+        {% for question in quiz.questions %}
+        <div class="question">
+            <p>{{ types[question.type] }} question</p>
+            <p>Question : {{ question.question }}</p>
+            {% if quiz.user_id == current_user.user_id %}
+                <p>Correct answer: {{ question.answers[0].answer }}</p>
+                {% if question.falseAnswer %}
+                    <p>False answer: 
+                        {% for f in question.falseAnswer %}
+                        {{ f.answer }}, 
+                        {% endfor %}
+                    </p>
+                {% endif %}
+            {% endif %}
+        </div>
+        {% endfor %}
         {% endif %}
     </div>
-    {% endblock %}
     {% if quiz.user_id == current_user.user_id %}
-    <div class="edit-quiz">
-        <button onclick="addQuestion(1)">Add True/False question</button>
-        <button onclick="addQuestion(2)">Add written answer question</button>
-        <button onclick="addQuestion(3)">Add multiple choice question</button>
-    
-        <div id="create-question">
+        <div class="edit-quiz">
+            <div class="select-buttons">
+                <button onclick="addQuestion(1)">Add True/False question</button>
+                <button onclick="addQuestion(2)">Add written answer question</button>
+                <button onclick="addQuestion(3)">Add multiple choice question</button>
+            </div>
+            <div id="create-question">
+            </div>
         </div>
-    </div>
     {% endif %}
 </div>
+{% endblock %}
