@@ -231,6 +231,7 @@ def view_one_quiz(quiz_id):
     )
 
     # Get scores and times on list
+    print(scores)
     scores = [(s.score, s.time, s.user.username) for s in scores]
     scores.sort()    
     session['current_quiz_id'] = quiz_id

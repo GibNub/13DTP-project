@@ -288,6 +288,7 @@ h2 {
     grid-template-columns: repeat(4, 1fr);
     grid-template-rows: repeat(auto-fit, minmax());
     grid-auto-rows: 200px;
+    border-bottom: solid 10px var(--accent-colour);
 }
 
 
@@ -300,17 +301,44 @@ h2 {
     margin: 15px;
 }
 
+#create-question {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+#fact_answer {
+    font-size: 2em;
+    padding: 0;
+    list-style-type: none;
+}
+
+#fact_answer li {
+    margin: 0 30px;
+    display: inline;
+}
 
 #create-question form {
-    width: 90%;
+    background-color: var(--layer-background-colour);
+    padding: 30px 0;
+    width: 40%;
     display: flex;
-    align-items: start;
-    justify-content: start;
+    align-items: center;
+    justify-content: center;
     flex-direction: column;
 }
 
 #create-question form > input {
-    width: 100%;
+    color: white;
+    width: 80%;
+    border: none;
+    margin: 10px 0;
+    padding: 20px 10px;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    background-color: var(--background-colour);
 }
 
 .create-question {
@@ -339,6 +367,19 @@ h2 {
 }
 
 
+.leaderboard {
+    display: flex;
+    align-items: start;
+    flex-direction: column;
+    justify-content: start;
+}
+
+.leaderboard .score {
+    padding: 40px;
+    background-color: var(--layer-background-colour);
+}
+
+
 .edit-quiz button:hover {
     cursor: pointer;
 }
@@ -355,3 +396,18 @@ input:hover[type=submit] {
 }
 /* Remove white background on form autofill */
 
+
+/* Attempting quizzes */
+.attempt-quiz {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.attempt-question {
+    font-size: 3em;
+    background-color: var(--layer-background-colour);
+    padding: 30px 20px;
+    margin: 20px 0;
+}

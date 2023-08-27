@@ -44,9 +44,12 @@
     <div class="leaderboard">
         <h3>Leaderboard</h3>
         {% for u in quiz.user_score %}
-            {{ u.user.username }}
-            {{ u.score }}
-            {{ u.time }}
+        <div class="score">
+            <p>{{ u.user.username }}</p>
+            <p>Placement {{ loop.index }}</p>
+            <p>Score: {{ u.score }}</p>
+            <p>Time: {{ u.time }}s</p>
+        </div>
         {% endfor %}
     </div>
     <div class="questions">
