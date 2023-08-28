@@ -1,7 +1,6 @@
 {% extends 'layout.html' %}
 {% block content %}
 {{ info }}
-
 {% if current_user.is_authenticated %}
     Authed {{ current_user.username }}
 {% else %}
