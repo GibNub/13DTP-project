@@ -21,4 +21,3 @@ DROP TABLE "UserScore";
 ALTER TABLE "new_UserScore" RENAME TO "UserScore";
 PRAGMA foreign_key_check;
 PRAGMA foreign_keys=ON;
-mi

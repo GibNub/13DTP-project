@@ -1,6 +1,6 @@
 from time import time
-from math import sqrt, floor
-from flask import render_template, url_for, flash, redirect, request, session
+from math import floor
+from flask import render_template, url_for, flash, redirect, abort, request, session
 from flask_login import login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from prisma import models
@@ -21,8 +21,10 @@ QUESTION_TYPES = {
 MAX_SCORE = 1000
 
 
+# Quick function to get one quiz and all related information
 def get_one_quiz(quiz_id):
     quiz = models.Quiz.prisma().find_first(
+        # Get all questions, answers, and false answers if it exists
         include={
             'questions': {
                 'include': {
@@ -30,6 +32,7 @@ def get_one_quiz(quiz_id):
                     'falseAnswer': True,
                 }
             },
+            # Get all submitted scores
             'user_score':  {
                 'include': {
                     'user': True,
@@ -45,6 +48,10 @@ def get_one_quiz(quiz_id):
 
 # Get the id of the newley created question
 def get_question_id():
+    '''
+    Quickly get the id of newly created question,
+    easier to link answer
+    '''
     question_id = models.Question.prisma().find_first(
         order={
             'question_id': 'desc'
@@ -73,8 +80,7 @@ def home():
     return render_template('home.html')
 
 
-# User Account views
-# Account page, no session shows signup/login
+# Account page, no session shows signup/login forms instead
 @app.get('/account')
 def account():
     signup_form = forms.SignUp()
@@ -82,7 +88,7 @@ def account():
     return render_template('account_manage.html', signup_form=signup_form, login_form=login_form)
 
 
-# Log user out
+# Logout user
 @app.get('/account/logout')
 @login_required
 def account_logout():
@@ -114,6 +120,7 @@ def account_signup():
                 'confirmed': False,
             }
         )
+    # TODO setup email
     return redirect(url_for('account'))
     token = generate_token(email)
     confirm_url = url_for('confirm_email', token=token, _external=True)
@@ -133,7 +140,7 @@ def confirm_email(token):
     try:
         email = confirm_token(token)
     except:
-        print('invalid')
+        flash('token invalid')
     user_data = models.User.prisma().find_first(
         where={
             'email': email,
@@ -142,6 +149,7 @@ def confirm_email(token):
     user = UserClass(user_data.__dict__)
     if user.confirmed:
         print('already confirmed')
+    # Confirm user in database
     else:
         models.User.prisma().update(
             where={
@@ -173,11 +181,11 @@ def account_login():
         user = UserClass(user_data.__dict__)
         # Check usernames and passwords
         if check_password_hash(user.password, password):
-            # Check if user is confirmed first
             if user.confirmed:
                 session['username'] = None
                 login_user(user, remember=remember)
             else:
+                # Will update when email confirmatino implemented
                 session['username'] = None
                 login_user(user, remember=remember)
                 # session['username'] = user.username
@@ -198,6 +206,7 @@ def settings():
 @app.get('/quiz/view/all')
 def view_quiz():
     # Get quiz info, the questions, and the answer to each question
+    # Sample of first 3 questions
     quiz = models.Quiz.prisma().find_many(
         include={
             'questions': {
@@ -212,16 +221,17 @@ def view_quiz():
 
 
 # View individual quizzes
-# User edits their own quizzes here
+# User edits their own quizzes on this page
 @app.get('/quiz/view/<int:quiz_id>')
 def view_one_quiz(quiz_id):
     written_form = forms.WrittenQuestion()
     fact_form = forms.TrueFalseQuestion()
     multi_choice_form = forms.MultipleChoiceQuestion()
     quiz = get_one_quiz(quiz_id)
-
-    # Generate the leaderboard
-    scores = models.UserScore.prisma().find_many(
+    if not quiz:
+        abort(404)
+    # Get all submitted scores for a quiz
+    scores = models.Score.prisma().find_many(
         where={
             'quiz_id': quiz_id,
         },
@@ -230,28 +240,25 @@ def view_one_quiz(quiz_id):
         }
     )
 
-    # Get scores and times on list
-    print(scores)
+    # Store scores and times on list, then sort in order of score then time
     scores = [(s.score, s.time, s.user.username) for s in scores]
-    scores.sort()    
+    scores.sort()
     session['current_quiz_id'] = quiz_id
-    if not quiz:
-        print('404')
-    else:
-        return render_template('display_one_quiz.html',
-                                quiz=quiz,
-                                types=QUESTION_TYPES,
-                                written_form=written_form,
-                                fact_form=fact_form,
-                                multi_choice_form=multi_choice_form,
-                                quiz_id=quiz_id
-                                )
+    return render_template('display_one_quiz.html',
+                            quiz=quiz,
+                            types=QUESTION_TYPES,
+                            written_form=written_form,
+                            fact_form=fact_form,
+                            multi_choice_form=multi_choice_form,
+                            quiz_id=quiz_id
+                            )
 
 
-# View and create new quizzes here
+# View and create new quizzes
 @app.get('/quiz/view/my_quizzes')
 @login_required
 def quiz_creation():
+    # Get all quizzes and their questions made by a specific user
     user_quizzes = models.Quiz.prisma().find_many(
         where={
             'user_id': int(current_user.user_id)
@@ -279,6 +286,7 @@ def create(form_type):
                     'user_id': int(current_user.user_id)
                 }
             )
+            # Created quiz id to redirect user
             new_quiz_id = models.Quiz.prisma().find_first(
                 order={
                     'quiz_id': 'desc',
@@ -287,7 +295,8 @@ def create(form_type):
             return redirect(url_for('view_one_quiz', quiz_id=new_quiz_id))
 
     # Editing quiz
-    # Check if the current user id is same as author of quiz
+    
+    # Check if the current user id is same as user id of quiz creators
     quiz_id = session.get('current_quiz_id', None)
     quiz_user = models.Quiz.prisma().find_first(
         where={
@@ -298,11 +307,13 @@ def create(form_type):
         return redirect(url_for('view_one_quiz', quiz_id=quiz_id))
 
     # Create new question for specific quiz
+    # Get question_id function used to link answer to created question
+
     # Create true and false questions for the quiz
     elif form_type == '1':
         form = forms.TrueFalseQuestion()
         if 'quiz-fact' in request.form and form.validate_on_submit():
-            # create true statement as question in database
+            # Create true statement as question in database
             models.Question.prisma().create(
                 data={
                     'quiz_id': quiz_id,
@@ -310,6 +321,7 @@ def create(form_type):
                     'type': int(form_type)
                 }
             )
+            # Create answer for fact question
             question_id = get_question_id()
             models.Answer.prisma().create(
                 data={
@@ -318,7 +330,7 @@ def create(form_type):
                 }
             )
 
-    # Create written answer, add question and answer to database
+    # Create written question
     elif form_type == '2':
         form = forms.WrittenQuestion()
         if 'quiz-written' in request.form and form.validate_on_submit():
@@ -329,6 +341,7 @@ def create(form_type):
                     'type': int(form_type)
                 }
             )
+            # Add answer for written question
             question_id = get_question_id()
             models.Answer.prisma().create(
                 data={
@@ -341,7 +354,7 @@ def create(form_type):
     elif form_type == '3':
         form = forms.MultipleChoiceQuestion()
         if 'quiz-multi' in request.form and form.validate_on_submit():
-            # Create question and correct answer
+            # Create question
             models.Question.prisma().create(
                 data={
                     'quiz_id': quiz_id,
@@ -349,6 +362,7 @@ def create(form_type):
                     'type': int(form_type)
                 }
             )
+            # Create answer
             question_id = get_question_id()
             models.Answer.prisma().create(
                 data={
@@ -367,17 +381,17 @@ def create(form_type):
     return redirect(url_for('view_one_quiz', quiz_id=quiz_id))
 
 
-# Attempting a quiz
+# Start quiz attempt
 @app.get('/quiz/attempt/<int:quiz_id>')
 @login_required
 def attempt_quiz(quiz_id):
     session['start_time'] = time()
     quiz = get_one_quiz(quiz_id)
-    # Get all the question ids in the current quiz
+    # Get all the question ids from the current quiz
     question_ids = []
     for q in quiz.questions:
         question_ids.append(q.question_id)
-    # Get all incorrect answers for multi choice questions
+    # Get all incorrect answers for any multi choice questions
     false_answers = models.FalseAnswer.prisma().find_many(
         where={
             'question_id': {'in': question_ids},
@@ -394,44 +408,43 @@ def attempt_quiz(quiz_id):
 @app.post('/quiz/attempt/<int:quiz_id>/submit')
 @login_required
 def submit_quiz(quiz_id):
-    # Check if a valid user submits score
     if not current_user.user_id:
         return redirect(url_for('home'))
-    else:
-        time_now = time()
-        user_answers = request.form
-        quiz = get_one_quiz(quiz_id)
-        # Define points per question (ppq)
-        ppq = MAX_SCORE / len(quiz.questions)
-        # Validate submitted attempt
-        if len(quiz.questions) != len(user_answers):
-            flash('The submitted attempt is not valid', 'error')
-            return redirect(url_for('view_one_quiz', quiz_id=quiz_id))
-        # Check if each answer is correct or incorrect, then increment amount correct by one
-        correct_count = 0
-        for question in quiz.questions:
-            if user_answers[str(question.question_id)] == question.answers[0].answer:
-                correct_count += 1
+    time_now = time()
+    user_answers = request.form
+    quiz = get_one_quiz(quiz_id)
+    # Define points per question (ppq)
+    ppq = MAX_SCORE / len(quiz.questions)
+    # Validate submitted attempt
+    if len(quiz.questions) != len(user_answers):
+        flash('The submitted attempt is not valid', 'error')
+        return redirect(url_for('view_one_quiz', quiz_id=quiz_id))
+    # Check if each answer is correct or incorrect, then increment amount correct by one
+    correct_count = 0
+    for question in quiz.questions:
+        if user_answers[str(question.question_id)] == question.answers[0].answer:
+            correct_count += 1
 
-        # Calculate final score and time
-        delta_time = time_now - session.get('start_time')
-        final_score = floor(correct_count * ppq)
-        # Submit score in database
-        models.UserScore.prisma().create(
-            data={
-                'quiz_id': quiz.quiz_id,
-                'user_id': int(current_user.user_id),
-                'score': final_score,
-                'time': int(delta_time)
-            }
-        )
-        return redirect(url_for('home'))
+    # Calculate final score and time
+    delta_time = time_now - session.get('start_time')
+    final_score = floor(correct_count * ppq)
+    # Submit score in database
+    models.Score.prisma().create(
+        data={
+            'quiz_id': quiz.quiz_id,
+            'user_id': int(current_user.user_id),
+            'score': final_score,
+            'time': int(delta_time)
+        }
+    )
+    return redirect(url_for('home'))
 
 
 # User pages
 @app.get('/user/<int:user_id>')
 def user_page(user_id):
     user = models.User.prisma().find_first(
+        # Get user and all their created quizzes
         where={
             'user_id': user_id
         },
@@ -444,7 +457,6 @@ def user_page(user_id):
 
 
 # 404 error
-
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404

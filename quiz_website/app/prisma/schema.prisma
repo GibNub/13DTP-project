@@ -20,7 +20,7 @@ model User {
   admin            Boolean @default(false)
   confirmed        Boolean @default(false)
   quizzes          Quiz[]
-  quiz_score       UserScore[]
+  quiz_score       Score[]
 }
 
 model Quiz {
@@ -30,7 +30,7 @@ model Quiz {
   name        String
   description String?
   questions   Question[]
-  user_score  UserScore[]
+  user_score  Score[]
 }
 
 model Question {
@@ -57,13 +57,12 @@ model FalseAnswer {
   answer          String
 }
 
-model UserScore {
-  user        User @relation(fields: [user_id], references: [user_id])
-  user_id     Int
-  quiz        Quiz @relation(fields: [quiz_id], references: [quiz_id])
-  quiz_id     Int
-  score       Int
-  time        Int
-
-  @@id([user_id, quiz_id])
+model Score {
+  score_id Int @id @default(autoincrement())
+  user     User @relation(fields: [user_id], references: [user_id])
+  user_id  Int
+  quiz     Quiz @relation(fields: [quiz_id], references: [quiz_id])
+  quiz_id  Int
+  score    Int
+  time     Int
 }
