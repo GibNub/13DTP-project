@@ -121,11 +121,11 @@ def account_signup():
             }
         )
     # TODO setup email
-    return redirect(url_for('account'))
     token = generate_token(email)
     confirm_url = url_for('confirm_email', token=token, _external=True)
     template = render_template('email.html', confirm=confirm_url)
     send_email(email, subject='Confirm email', template=template)
+    return redirect(url_for('account'))
 
 
 # Pre-confirmation page
@@ -135,12 +135,15 @@ def unconfirmed():
 
 
 # Confirm user with token
-@app.get('/account/confirm/token')
+@app.get('/account/confirm/<token>')
 def confirm_email(token):
     try:
         email = confirm_token(token)
+        print('e')
     except:
         flash('token invalid')
+    if not email:
+        return redirect(url_for('account'))
     user_data = models.User.prisma().find_first(
         where={
             'email': email,
@@ -148,7 +151,8 @@ def confirm_email(token):
     )
     user = UserClass(user_data.__dict__)
     if user.confirmed:
-        print('already confirmed')
+        flash('already confirmed')
+        return redirect(url_for('account'))
     # Confirm user in database
     else:
         models.User.prisma().update(
@@ -205,20 +209,48 @@ def settings():
 # Display all the quizzes in a page
 @app.get('/quiz/view/all')
 def view_quiz():
-    # Get quiz info, the questions, and the answer to each question
-    # Sample of first 3 questions
-    quiz = models.Quiz.prisma().find_many(
-        include={
-            'questions': {
-                'take': 3,
-                'include': {
-                    'answers': True
+    query = session.get('search_query', None)
+    # Use result from search query, otherwise get all quizzes
+    if not query:
+        # Get quiz info, the questions, and the answer to each question
+        # Sample of first 3 questions
+        quiz = models.Quiz.prisma().find_many(
+            include={
+                'questions': {
+                    'take': 3,
+                    'include': {
+                        'answers': True
+                    }
                 }
             }
-        }
-    )
+        )
+    else:
+        quiz = models.Quiz.prisma().find_many(
+            include={
+                'questions': {
+                    'take': 3,
+                    'include': {
+                        'answers': True
+                    }
+                }
+            },
+            where={
+                'name': {
+                    'contains': query
+                }
+            }
+        )
+        session.pop('search_query')
     return render_template('display_quiz.html', quiz=quiz, types=QUESTION_TYPES)
 
+
+# Search for quizzes
+@app.post('/quiz/view/query')
+def view_query_quiz():
+    # Get quizzes where the user query is in the name of a quiz
+    query = request.form.get('query')
+    session['search_query'] = query
+    return redirect(url_for('view_quiz'))
 
 # View individual quizzes
 # User edits their own quizzes on this page
