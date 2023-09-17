@@ -12,7 +12,7 @@ from app.token_id import generate_token, confirm_token
 
 
 QUESTION_TYPES = {
-        1: 'Boolean',
+        1: 'Fact',
         2: 'Written',
         3: 'Multiple choice'
     }
@@ -24,7 +24,7 @@ MAX_SCORE = 1000
 # Quick function to get one quiz and all related information
 def get_one_quiz(quiz_id):
     quiz = models.Quiz.prisma().find_first(
-        # Get all questions, answers, and false answers if it exists
+        # Get all questions, answers, and false answers if it exists from question table
         include={
             'questions': {
                 'include': {
@@ -32,12 +32,13 @@ def get_one_quiz(quiz_id):
                     'falseAnswer': True,
                 }
             },
-            # Get all submitted scores
+            # Get all submitted scores with user info from score table
             'user_score':  {
                 'include': {
                     'user': True,
                 }
-            }
+            },
+            'user': True,
         },
         where={
             'quiz_id': quiz_id
@@ -77,7 +78,7 @@ def user_loader(user_id):
 # Renders home page
 @app.get('/')
 def home():
-    return render_template('home.html')
+    return render_template('home.html', page_header='Home')
 
 
 # Account page, no session shows signup/login forms instead
@@ -85,7 +86,7 @@ def home():
 def account():
     signup_form = forms.SignUp()
     login_form = forms.Login()
-    return render_template('account_manage.html', signup_form=signup_form, login_form=login_form)
+    return render_template('account_manage.html', signup_form=signup_form, login_form=login_form, page_header='Manage account')
 
 
 # Logout user
@@ -94,7 +95,7 @@ def account():
 def account_logout():
     logout_user()
     flash('You have been logged out')
-    return redirect(url_for('account'))
+    return redirect(url_for('account', page_header='Manage account'))
 
 
 # Sign up request
@@ -125,7 +126,7 @@ def account_signup():
     confirm_url = url_for('confirm_email', token=token, _external=True)
     template = render_template('email.html', confirm=confirm_url)
     send_email(email, subject='Confirm email', template=template)
-    return redirect(url_for('account'))
+    return redirect(url_for('account', page_header='Manage account'))
 
 
 # Pre-confirmation page
@@ -163,7 +164,7 @@ def confirm_email(token):
                 'confirmed': True
             }
         )
-    return redirect(url_for('home'))
+    return redirect(url_for('home', page_header='Home'))
 
 
 # Login user if creds are valid
@@ -196,7 +197,7 @@ def account_login():
                 # return redirect(url_for('unconfirmed'))
         else:
             flash('Username or password is incorrect')
-    return redirect(url_for('home'))
+    return redirect(url_for('home', page_header='Home'))
 
 
 # Settings page
@@ -241,7 +242,7 @@ def view_quiz():
             }
         )
         session.pop('search_query')
-    return render_template('display_quiz.html', quiz=quiz, types=QUESTION_TYPES)
+    return render_template('display_quiz.html', quiz=quiz, types=QUESTION_TYPES, page_header='Browse quizzes')
 
 
 # Search for quizzes
@@ -250,7 +251,7 @@ def view_query_quiz():
     # Get quizzes where the user query is in the name of a quiz
     query = request.form.get('query')
     session['search_query'] = query
-    return redirect(url_for('view_quiz'))
+    return redirect(url_for('view_quiz', page_header='Browse quizzes'))
 
 # View individual quizzes
 # User edits their own quizzes on this page
@@ -282,7 +283,8 @@ def view_one_quiz(quiz_id):
                             written_form=written_form,
                             fact_form=fact_form,
                             multi_choice_form=multi_choice_form,
-                            quiz_id=quiz_id
+                            quiz_id=quiz_id,
+                            page_header='View quiz'
                             )
 
 
@@ -300,13 +302,14 @@ def quiz_creation():
         }
     )
     quiz_info = forms.QuizInfo()
-    return render_template('user_quiz.html', quiz_info=quiz_info, user_quizzes=user_quizzes, types=QUESTION_TYPES)
+    return render_template('user_quiz.html', quiz_info=quiz_info, user_quizzes=user_quizzes, types=QUESTION_TYPES, page_header='My quizzes')
 
 
 # Create new quiz and questions for that quiz
 @app.post('/quiz/create/<form_type>')
 @login_required
 def create(form_type):
+    page_header='View quiz'
     # Create new quiz
     if form_type == '0':
         form = forms.QuizInfo()
@@ -324,7 +327,7 @@ def create(form_type):
                     'quiz_id': 'desc',
                 }
             ).quiz_id
-            return redirect(url_for('view_one_quiz', quiz_id=new_quiz_id))
+            return redirect(url_for('view_one_quiz', quiz_id=new_quiz_id, page_header=page_header))
 
     # Editing quiz
     
@@ -336,7 +339,7 @@ def create(form_type):
         }
     ).user_id
     if quiz_user != int(current_user.user_id):
-        return redirect(url_for('view_one_quiz', quiz_id=quiz_id))
+        return redirect(url_for('view_one_quiz', quiz_id=quiz_id, page_header=page_header))
 
     # Create new question for specific quiz
     # Get question_id function used to link answer to created question
@@ -410,7 +413,7 @@ def create(form_type):
                         'answer': answer,
                     }
                 )
-    return redirect(url_for('view_one_quiz', quiz_id=quiz_id))
+    return redirect(url_for('view_one_quiz', quiz_id=quiz_id, page_header=page_header))
 
 
 # Start quiz attempt
@@ -432,7 +435,8 @@ def attempt_quiz(quiz_id):
     
     return render_template('attempt_quiz.html',
                            quiz=quiz,
-                           false_answers=false_answers
+                           false_answers=false_answers,
+                           page_header='Attempting quiz'
                            )
 
 
@@ -469,7 +473,7 @@ def submit_quiz(quiz_id):
             'time': int(delta_time)
         }
     )
-    return redirect(url_for('home'))
+    return redirect(url_for('view_one_quiz', quiz_id=quiz_id, page_header='View quiz'))
 
 
 # User pages
@@ -485,7 +489,7 @@ def user_page(user_id):
             'quiz_score': True
         }
     )
-    return render_template('user.html', user=user)
+    return render_template('user.html', user=user, page_header='User page')
 
 
 # 404 error

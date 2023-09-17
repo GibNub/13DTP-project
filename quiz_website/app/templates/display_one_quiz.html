@@ -35,6 +35,7 @@
     <div class="quiz-info">
         <h2>{{ quiz.name }}</h2>
         <p>{{ quiz.description }}</p>
+        <p>Created by <a href="{{ url_for('user_page', user_id=quiz.user.user_id) }}"><span style="border-bottom: solid 5px var(--accent-colour);">{{ quiz.user.username }}</span></a></p>
     </div>
     <div class="attempt-button">
         <form action="{{ url_for('attempt_quiz', quiz_id=quiz_id) }}">
@@ -45,8 +46,10 @@
         <h3>Leaderboard</h3>
         {% for u in quiz.user_score %}
         <div class="score">
-            <p>{{ u.user.username }}</p>
-            <p>Placement {{ loop.index }}</p>
+            <span style="font-weight: bold; font-size: 1.2em;">
+                <p>{{ u.user.username }}</p>
+            </span>
+            <p>Placement: {{ loop.index }}</p>
             <p>Score: {{ u.score }}</p>
             <p>Time: {{ u.time }}s</p>
         </div>
@@ -57,7 +60,7 @@
         {% if quiz.questions %}
         {% for question in quiz.questions %}
         <div class="question">
-            <p>{{ types[question.type] }} question</p>
+            <p><span style="font-weight: bold; font-size: 1.2em;">{{ types[question.type] }}</span></p>
             <p>Question : {{ question.question }}</p>
             {% if quiz.user_id == current_user.user_id %}
                 <p>Correct answer: {{ question.answers[0].answer }}</p>
