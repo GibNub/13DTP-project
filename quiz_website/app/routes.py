@@ -3,6 +3,7 @@ from math import floor
 from flask import render_template, url_for, flash, redirect, abort, request, session
 from flask_login import login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from profanity_check import predict_prob
 from prisma import models
 
 from app import forms, login_manager, app
@@ -19,7 +20,10 @@ QUESTION_TYPES = {
 
 
 MAX_SCORE = 1000
-
+# Lower value means will catch more words (0 to 1)
+FILTER_LENIANCY = 0.8
+def is_profane(text):
+    return predict_prob([text]) > FILTER_LENIANCY
 
 # Quick function to get one quiz and all related information
 def get_one_quiz(quiz_id):
@@ -94,7 +98,7 @@ def account():
 @login_required
 def account_logout():
     logout_user()
-    flash('You have been logged out')
+    flash('You have been logged out', category='info')
     return redirect(url_for('account', page_header='Manage account'))
 
 
@@ -108,8 +112,13 @@ def account_signup():
         email = signup_form.signup_email.data
         password = signup_form.signup_password.data
         confirm_pass = signup_form.signup_password_confirm.data
+        # Check for profanity in username
+        if is_profane(username):
+            flash('Username contains profanity', category='error')
+            return redirect(url_for('account'))
         # Check if passwords match
         if password != confirm_pass:
+            flash('Password do not match', category='error')
             return redirect(url_for('account'))
         # Hash password and store user data
         password_hash = generate_password_hash(signup_form.signup_password.data, salt_length=16)
@@ -142,7 +151,7 @@ def confirm_email(token):
         email = confirm_token(token)
         print('e')
     except:
-        flash('token invalid')
+        flash('token invalid', category='error')
     if not email:
         return redirect(url_for('account'))
     user_data = models.User.prisma().find_first(
@@ -152,7 +161,7 @@ def confirm_email(token):
     )
     user = UserClass(user_data.__dict__)
     if user.confirmed:
-        flash('already confirmed')
+        flash('already confirmed', category='error')
         return redirect(url_for('account'))
     # Confirm user in database
     else:
@@ -181,7 +190,7 @@ def account_login():
             }
         )
         if not user_data:
-            flash('User does not exist')
+            flash('User does not exist', category='error')
             return redirect(url_for('account'))
         user = UserClass(user_data.__dict__)
         # Check usernames and passwords
@@ -196,7 +205,7 @@ def account_login():
                 # session['username'] = user.username
                 # return redirect(url_for('unconfirmed'))
         else:
-            flash('Username or password is incorrect')
+            flash('Username or password is incorrect', category='error')
     return redirect(url_for('home', page_header='Home'))
 
 
@@ -311,9 +320,14 @@ def quiz_creation():
 def create(form_type):
     page_header='View quiz'
     # Create new quiz
+    def complete(ref_quiz_id):
+        return redirect(url_for('view_one_quiz', quiz_id=ref_quiz_id, page_header=page_header))
     if form_type == '0':
         form = forms.QuizInfo()
         if 'quiz-info' in request.form and form.validate_on_submit():
+            if is_profane(form.name.data):
+                flash('Quiz name contains profanity', category='error')
+                return redirect(url_for('quiz_creation'))
             models.Quiz.prisma().create(
                 data={
                     'name': form.name.data,
@@ -327,7 +341,7 @@ def create(form_type):
                     'quiz_id': 'desc',
                 }
             ).quiz_id
-            return redirect(url_for('view_one_quiz', quiz_id=new_quiz_id, page_header=page_header))
+            complete(new_quiz_id)
 
     # Editing quiz
     
@@ -339,7 +353,7 @@ def create(form_type):
         }
     ).user_id
     if quiz_user != int(current_user.user_id):
-        return redirect(url_for('view_one_quiz', quiz_id=quiz_id, page_header=page_header))
+        complete(quiz_id)
 
     # Create new question for specific quiz
     # Get question_id function used to link answer to created question
@@ -348,6 +362,9 @@ def create(form_type):
     elif form_type == '1':
         form = forms.TrueFalseQuestion()
         if 'quiz-fact' in request.form and form.validate_on_submit():
+            if is_profane(form.fact_statement.data):
+                flash('Question contains profanity', category='error')
+                complete(quiz_id)
             # Create true statement as question in database
             models.Question.prisma().create(
                 data={
@@ -369,6 +386,9 @@ def create(form_type):
     elif form_type == '2':
         form = forms.WrittenQuestion()
         if 'quiz-written' in request.form and form.validate_on_submit():
+            if is_profane(form.written_question.data) or is_profane(form.written_answer.data):
+                flash('Question contains profanity', category='error')
+                complete(quiz_id)
             models.Question.prisma().create(
                 data={
                     'quiz_id': quiz_id,
@@ -389,6 +409,9 @@ def create(form_type):
     elif form_type == '3':
         form = forms.MultipleChoiceQuestion()
         if 'quiz-multi' in request.form and form.validate_on_submit():
+            if is_profane(form.multi_question.data) or is_profane(form.correct_answer.data):
+                flash('Question contains profanity', category='error')
+                complete(quiz_id)
             # Create question
             models.Question.prisma().create(
                 data={
@@ -407,6 +430,9 @@ def create(form_type):
             )
             # Create false answers in the database if question is multichoice
             for answer in [form.false_one.data, form.false_two.data, form.false_three.data]:
+                if is_profane(answer):
+                    flash('Question contains profanity', category='error')
+                    complete()
                 models.FalseAnswer.prisma().create(
                     data={
                         'question_id': question_id,

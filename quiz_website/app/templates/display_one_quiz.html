@@ -31,6 +31,17 @@
         `;
     };
 </script>
+<div class="flash">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <ul>
+            {% for c, m in messages %}
+                <li class="{{c}}">{{m}}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    {% endwith %}
+</div>
 <div class="display-one-quiz">
     <div class="quiz-info">
         <h2>{{ quiz.name }}</h2>

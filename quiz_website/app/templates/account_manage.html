@@ -1,6 +1,17 @@
 {% extends 'layout.html' %}
 {% block content %}
 <div class="acc-manage-container">
+    <div class="flash">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul>
+                {% for c, m in messages %}
+                    <li class="{{c}}">{{m}}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% endwith %}
+    </div>
     <div class="signup acc-form">
         <p>Sign Up</p>
         <form method="POST" action="{{ url_for('account_signup') }}">
