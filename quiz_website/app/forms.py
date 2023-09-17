@@ -1,13 +1,13 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, EmailField, BooleanField, RadioField, TextAreaField
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, Length
 
 
 # Accounts
 class SignUp(FlaskForm):
-    signup_username = StringField('Username', validators=[DataRequired()], render_kw={'placeholder' : 'Username'})
+    signup_username = StringField('Username', validators=[DataRequired(), Length(min=3, max=32)], render_kw={'placeholder' : 'Username'})
     signup_email = EmailField('Email', validators=[DataRequired()], render_kw={'placeholder' : 'Email'})
-    signup_password = PasswordField('Password', validators=[DataRequired()], render_kw={'placeholder' : 'Password'})
+    signup_password = PasswordField('Password', validators=[DataRequired(), Length(min=5)], render_kw={'placeholder' : 'Password'})
     signup_password_confirm = PasswordField('ConfirmPassword', validators=[DataRequired()], render_kw={'placeholder' : 'Confirm password'})
     submit = SubmitField('Signup', name='signup-form', id='signup-form')
 

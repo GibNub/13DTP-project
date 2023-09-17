@@ -28,7 +28,7 @@ def is_profane(text):
 # Quick function to get one quiz and all related information
 def get_one_quiz(quiz_id):
     quiz = models.Quiz.prisma().find_first(
-        # Get all questions, answers, and false answers if it exists from question table
+        # Get all questions, answers, and false answers if it exists from question table for the given quiz
         include={
             'questions': {
                 'include': {
@@ -99,26 +99,44 @@ def account():
 def account_logout():
     logout_user()
     flash('You have been logged out', category='info')
-    return redirect(url_for('account', page_header='Manage account'))
+    return redirect(url_for('account'))
 
 
 # Sign up request
 @app.post('/account/signup')
 def account_signup():
     signup_form = forms.SignUp()
+    error = False
     # Create user account
     if 'signup-form' in request.form and signup_form.validate_on_submit():
         username = signup_form.signup_username.data
         email = signup_form.signup_email.data
         password = signup_form.signup_password.data
         confirm_pass = signup_form.signup_password_confirm.data
+        # Check if username or email already exists
+        existsing_info = models.User.prisma().find_many()
+        # Get each existing info into lists
+        existing_usernames = [x.username for x in existsing_info]
+        existing_emails = [x.email for x in existsing_info]
+        if username in existing_usernames or email in existing_emails:
+            flash('Username or email already exists', category='error')
+            error = True
         # Check for profanity in username
         if is_profane(username):
             flash('Username contains profanity', category='error')
-            return redirect(url_for('account'))
+            error = True
+        # Check for min and max length
+        if len(username) > 32 or len(username) < 3:
+            flash('Username is too short or too long', category='error')
+            error = True
+        if len(password) < 3:
+            flash('Password is too short', category='error')
+            error = True
         # Check if passwords match
         if password != confirm_pass:
             flash('Password do not match', category='error')
+            error = True
+        if error:
             return redirect(url_for('account'))
         # Hash password and store user data
         password_hash = generate_password_hash(signup_form.signup_password.data, salt_length=16)
@@ -130,12 +148,13 @@ def account_signup():
                 'confirmed': False,
             }
         )
+        flash('Account created, please log in', category='info')
     # TODO setup email
-    token = generate_token(email)
-    confirm_url = url_for('confirm_email', token=token, _external=True)
-    template = render_template('email.html', confirm=confirm_url)
-    send_email(email, subject='Confirm email', template=template)
-    return redirect(url_for('account', page_header='Manage account'))
+    # token = generate_token(email)
+    # confirm_url = url_for('confirm_email', token=token, _external=True)
+    # template = render_template('email.html', confirm=confirm_url)
+    # send_email(email, subject='Confirm email', template=template)
+    return redirect(url_for('account'))
 
 
 # Pre-confirmation page
@@ -173,7 +192,7 @@ def confirm_email(token):
                 'confirmed': True
             }
         )
-    return redirect(url_for('home', page_header='Home'))
+    return redirect(url_for('home'))
 
 
 # Login user if creds are valid
@@ -190,7 +209,7 @@ def account_login():
             }
         )
         if not user_data:
-            flash('User does not exist', category='error')
+            flash('Login failed. Username or password is incorrect', category='error')
             return redirect(url_for('account'))
         user = UserClass(user_data.__dict__)
         # Check usernames and passwords
@@ -198,15 +217,17 @@ def account_login():
             if user.confirmed:
                 session['username'] = None
                 login_user(user, remember=remember)
+                flash('Logged in', category='info')
             else:
-                # Will update when email confirmatino implemented
+                # Will update when email confirmatin implemented
                 session['username'] = None
                 login_user(user, remember=remember)
                 # session['username'] = user.username
                 # return redirect(url_for('unconfirmed'))
         else:
-            flash('Username or password is incorrect', category='error')
-    return redirect(url_for('home', page_header='Home'))
+            flash('Login failed. Username or password is incorrect', category='error')
+            return redirect(url_for('account'))
+    return redirect(url_for('home'))
 
 
 # Settings page
@@ -220,10 +241,9 @@ def settings():
 @app.get('/quiz/view/all')
 def view_quiz():
     query = session.get('search_query', None)
-    # Use result from search query, otherwise get all quizzes
+    # Use result from search query for database query, otherwise get all quizzes
     if not query:
-        # Get quiz info, the questions, and the answer to each question
-        # Sample of first 3 questions
+        # Get all quizzes from quiz table, include 3 questions and answers to each
         quiz = models.Quiz.prisma().find_many(
             include={
                 'questions': {
@@ -235,6 +255,8 @@ def view_quiz():
             }
         )
     else:
+        # Get all quizzes from quiz table, include 3 questions and answers to each
+        # Where the the title contains the search query
         quiz = models.Quiz.prisma().find_many(
             include={
                 'questions': {
@@ -260,7 +282,7 @@ def view_query_quiz():
     # Get quizzes where the user query is in the name of a quiz
     query = request.form.get('query')
     session['search_query'] = query
-    return redirect(url_for('view_quiz', page_header='Browse quizzes'))
+    return redirect(url_for('view_quiz'))
 
 # View individual quizzes
 # User edits their own quizzes on this page
@@ -318,10 +340,9 @@ def quiz_creation():
 @app.post('/quiz/create/<form_type>')
 @login_required
 def create(form_type):
-    page_header='View quiz'
     # Create new quiz
     def complete(ref_quiz_id):
-        return redirect(url_for('view_one_quiz', quiz_id=ref_quiz_id, page_header=page_header))
+        return redirect(url_for('view_one_quiz', quiz_id=ref_quiz_id))
     if form_type == '0':
         form = forms.QuizInfo()
         if 'quiz-info' in request.form and form.validate_on_submit():
@@ -335,12 +356,13 @@ def create(form_type):
                     'user_id': int(current_user.user_id)
                 }
             )
-            # Created quiz id to redirect user
+            # Get created quiz id to redirect user
             new_quiz_id = models.Quiz.prisma().find_first(
                 order={
                     'quiz_id': 'desc',
                 }
             ).quiz_id
+            flash('Quiz created', category='info')
             complete(new_quiz_id)
 
     # Editing quiz
@@ -381,6 +403,7 @@ def create(form_type):
                     'answer': form.fact_answer.data
                 }
             )
+            flash('Fact question created', category='info')
 
     # Create written question
     elif form_type == '2':
@@ -404,6 +427,7 @@ def create(form_type):
                     'answer': form.written_answer.data
                 }
             )
+            flash('Written question created', category='info')
 
     # Create multiple choice questions for quiz
     elif form_type == '3':
@@ -432,14 +456,15 @@ def create(form_type):
             for answer in [form.false_one.data, form.false_two.data, form.false_three.data]:
                 if is_profane(answer):
                     flash('Question contains profanity', category='error')
-                    complete()
+                    complete(quiz_id)
                 models.FalseAnswer.prisma().create(
                     data={
                         'question_id': question_id,
                         'answer': answer,
                     }
                 )
-    return redirect(url_for('view_one_quiz', quiz_id=quiz_id, page_header=page_header))
+            flash('Multiple choice question created', category='info')
+    return redirect(url_for('view_one_quiz', quiz_id=quiz_id))
 
 
 # Start quiz attempt
@@ -499,7 +524,8 @@ def submit_quiz(quiz_id):
             'time': int(delta_time)
         }
     )
-    return redirect(url_for('view_one_quiz', quiz_id=quiz_id, page_header='View quiz'))
+    flash('Attempt submitted', category='info')
+    return redirect(url_for('view_one_quiz', quiz_id=quiz_id))
 
 
 # User pages
@@ -522,3 +548,8 @@ def user_page(user_id):
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
+
+
+@app.errorhandler(500)
+def internal_error(e):
+    return render_template('500.html'), 500

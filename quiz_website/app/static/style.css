@@ -39,6 +39,7 @@ a:hover {
 .flash ul {
     font-family: inherit;
     list-style-type: none;
+    padding: 0;
 }
 
 .flash .info {

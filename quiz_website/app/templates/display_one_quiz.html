@@ -58,7 +58,9 @@
         {% for u in quiz.user_score %}
         <div class="score">
             <span style="font-weight: bold; font-size: 1.2em;">
-                <p>{{ u.user.username }}</p>
+                <a href="{{ url_for('user_page', user_id=u.user.user_id) }}">
+                    <p>{{ u.user.username }}</p>
+                </a>
             </span>
             <p>Placement: {{ loop.index }}</p>
             <p>Score: {{ u.score }}</p>
