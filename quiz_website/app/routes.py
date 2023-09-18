@@ -20,7 +20,7 @@ QUESTION_TYPES = {
 
 
 MAX_SCORE = 1000
-# Lower value means will catch more words (0 to 1)
+# Lower value means catch more words (0 to 1)
 FILTER_LENIANCY = 0.8
 def is_profane(text):
     return predict_prob([text]) > FILTER_LENIANCY
