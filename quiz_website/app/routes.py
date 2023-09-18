@@ -487,7 +487,8 @@ def attempt_quiz(quiz_id):
     return render_template('attempt_quiz.html',
                            quiz=quiz,
                            false_answers=false_answers,
-                           page_header='Attempting quiz'
+                           page_header='Attempting quiz',
+                           types=QUESTION_TYPES
                            )
 
 

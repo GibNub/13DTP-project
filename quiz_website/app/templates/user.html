@@ -1,16 +1,25 @@
 {% extends 'layout.html' %}
 {% block content %}
-{{ user.username }}
+<div class="user-page-container">
+    <div class="user-page-username">
+        <h2>{{ user.username }}</h2>
+    </div>
+    <div class="user-page-quiz">
+        <p>Quizzes:</p>
+        <ul>
+        {% for q in user.quizzes %}
+            <li>
+                <p>{{ q.name }}</p>
+                <p>{{ q.desc }}</p>
+            </li>
+        {% endfor %}
+        </ul>
+    </div>
+    <div class="user-page-score">
+        
+    </div>
+</div>
 
-<p>Quizzes:</p>
-<li>
-{% for q in user.quizzes %}
-    <li>
-        <p>{{ q.name }}</p>
-        <p>{{ q.desc }}</p>
-    </li>
-{% endfor %}
-</li>
 
 
 <p>Scores</p>

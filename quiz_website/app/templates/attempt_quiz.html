@@ -2,41 +2,55 @@
 {% block content %}
 <script src="{{ url_for('static', filename='randomizeMultichoice.js') }}"></script>
 <div>
-    <h2>Name : {{ quiz.name }}</h2>
-    <p>Description : {{ quiz.desc }}</p>
-    <div class="attempt-quiz">
-        <form action="{{ url_for('submit_quiz', quiz_id=quiz.quiz_id ) }}" method="POST">
-        {% for question in quiz.questions %}
-            <div class="attempt-question">
-                <p>Question {{ loop.index }}</p>
-                <p>{{ question.question }}</p>
-                {% if question.type == 1 %}
-                    {# true false question #}
-                    <label for="true-{{ question.question_id }}">True</label>
-                    <input type="radio" name="{{ question.question_id }}" value="True" id="true-{{ question.question_id }}" required>
-                    <label for="false-{{ question.question_id }}">False</label>
-                    <input type="radio" name="{{ question.question_id }}" value="False" id="false-{{ question.question_id }}" required>
-                {% elif question.type == 2 %}
-                    {# Written type question #}
-                    <input type="text" name="{{ question.question_id }}" required>
-                {% elif question.type == 3 %}
-                    {# multi choice #}
-                    <div id="{{ question.question_id }}">
-                        <label for="{{ question.answers[0].answer }}">{{ question.answers[0].answer }}</label>
-                        <input type="radio" name="{{ question.question_id }}" value="{{ question.answers[0].answer }}" id="{{ question.answers[0].answer }}" required>
-                        {# false statements #}
-                        {% for f in false_answers %}
-                            {% if f.question_id == question.question_id %}
-                                <label for="multi-{{ f.answer }}">{{ f.answer }}</label>
-                                <input type="radio" name="{{ question.question_id }}" value="{{ f.answer }}" id="{{ f.answer }}" required>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            </div>
-        {% endfor %}
-        <input type="submit" value="Submit">
-        </form>
+    <div class="attempt-quiz-info">
+        <h2>{{ quiz.name }}</h2>
     </div>
+    <form action="{{ url_for('submit_quiz', quiz_id=quiz.quiz_id ) }}" method="POST">
+        <div class="attempt-quiz">
+            {% for question in quiz.questions %}
+                <div class="attempt-question">
+                    <span style="padding-bottom: 5px; font-size: 1.3em; font-weight: bold;">
+                        Question {{ loop.index }}
+                    </span>
+                    <span class="q-type">
+                        <p>{{ types[question.type] }}</p>
+                    </span>
+                    <span style="padding: 10px 0; border-bottom: solid 5px var(--accent-colour); font-size: 0.8em;">{{ question.question }}</span>
+                    <div class="answer-selection">
+                        {% if question.type == 1 %}
+                            <div class="fact-answer">
+                                {# true false question #}
+                                <input type="radio" name="{{ question.question_id }}" value="True" id="true-{{ question.question_id }}" required>
+                                <label for="true-{{ question.question_id }}">True</label>
+                                <input type="radio" name="{{ question.question_id }}" value="False" id="false-{{ question.question_id }}" required>
+                                <label for="false-{{ question.question_id }}">False</label>
+                            </div>
+                        {% elif question.type == 2 %}
+                            <div class="written-answer">
+                                {# Written type question #}
+                                <input type="text" name="{{ question.question_id }}" required placeholder="Enter answer here">
+                            </div>
+                        {% elif question.type == 3 %}
+                            <div class="multi-choice-answer">
+                                {# multi choice #}
+                                <div id="{{ question.question_id }}">
+                                    <input type="radio" name="{{ question.question_id }}" value="{{ question.answers[0].answer }}" id="multi-{{ question.answers[0].answer_id }}" required>
+                                    <label for="multi-{{ question.answers[0].answer_id }}">{{ question.answers[0].answer }}</label>
+                                    {# false statements #}
+                                    {% for f in false_answers %}
+                                    {% if f.question_id == question.question_id %}
+                                        <input type="radio" name="{{ question.question_id }}" value="{{ f.answer }}" id="multi-{{ f.false_answer_id }}" required>
+                                        <label for="multi-{{ f.false_answer_id }}">{{ f.answer }}</label>
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+            <input type="submit" value="Submit">
+        </div>
+    </form>
 </div>
 {% endblock %}
