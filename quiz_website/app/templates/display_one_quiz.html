@@ -7,6 +7,7 @@
         form.innerHTML =`    
         {{ fact_form.csrf_token }}
         {{ fact_form.fact_statement }}
+        <p>Set answer</p>
         {{ fact_form.fact_answer }}
         {{ fact_form.submit }}
         `;
@@ -46,7 +47,7 @@
     <div class="quiz-info">
         <h2>{{ quiz.name }}</h2>
         <p>{{ quiz.description }}</p>
-        <p>Created by <a href="{{ url_for('user_page', user_id=quiz.user.user_id) }}"><span style="border-bottom: solid 5px var(--accent-colour);">{{ quiz.user.username }}</span></a></p>
+        <p>Created by <a href="{{ url_for('user_page', user_id=quiz.user.user_id) }}"><span style="border-bottom: solid 5px var(--accent-colour); font-weight: bold;">{{ quiz.user.username }}</span></a></p>
     </div>
     <div class="attempt-button">
         <form action="{{ url_for('attempt_quiz', quiz_id=quiz_id) }}">
@@ -54,20 +55,37 @@
         </form>
     </div>
     <div class="leaderboard">
+        {% if quiz.user_score|length %}
         <h3>Leaderboard</h3>
         {% for u in quiz.user_score %}
         <div class="score">
-            <span style="font-weight: bold; font-size: 1.2em;">
-                <a href="{{ url_for('user_page', user_id=u.user.user_id) }}">
-                    <p>{{ u.user.username }}</p>
-                </a>
+            <a href="{{ url_for('user_page', user_id=u.user.user_id) }}">
+                <p>
+                    <span style="border-bottom: solid 3px var(--accent-colour); font-weight: bold">{{ u.user.username }}</span>
+                </p>
+            </a>
             </span>
             <p>Placement: {{ loop.index }}</p>
             <p>Score: {{ u.score }}</p>
             <p>Time: {{ u.time }}s</p>
         </div>
         {% endfor %}
+        {% else %}
+        <h3>No one has attempted this quiz</h3>
+        {% endif %}
     </div>
+    {% if quiz.user_id == current_user.user_id %}
+    <div class="edit-quiz">
+        <div class="select-buttons">
+            <button onclick="addQuestion(1)">Add True/False question</button>
+            <button onclick="addQuestion(2)">Add written answer question</button>
+            <button onclick="addQuestion(3)">Add multiple choice question</button>
+        </div>
+        {# intentionally blank #}
+        <div id="create-question">
+        </div>
+    </div>
+{% endif %}
     <div class="questions">
         {# loop through all questions in quiz #}
         {% if quiz.questions %}
@@ -89,16 +107,5 @@
         {% endfor %}
         {% endif %}
     </div>
-    {% if quiz.user_id == current_user.user_id %}
-        <div class="edit-quiz">
-            <div class="select-buttons">
-                <button onclick="addQuestion(1)">Add True/False question</button>
-                <button onclick="addQuestion(2)">Add written answer question</button>
-                <button onclick="addQuestion(3)">Add multiple choice question</button>
-            </div>
-            <div id="create-question">
-            </div>
-        </div>
-    {% endif %}
 </div>
 {% endblock %}

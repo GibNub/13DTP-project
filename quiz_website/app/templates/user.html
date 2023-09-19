@@ -4,23 +4,28 @@
     <div class="user-page-username">
         <h2>{{ user.username }}</h2>
     </div>
-    <div class="user-page-quiz">
-        <p>Quizzes:</p>
-        <ul>
-        {% for q in user.quizzes %}
-            <li>
-                <p>{{ q.name }}</p>
-                <p>{{ q.desc }}</p>
-            </li>
-        {% endfor %}
-        </ul>
+    <div class="user-page-content">
+        <h3>Quizzes</h3>
+        <div class="u-page-container">
+            {% for quiz in user.quizzes %}
+            <a href="{{ url_for('view_one_quiz', quiz_id=quiz.quiz_id) }}">
+                <div class="u-content">
+                    <h2>{{ quiz.name }}</h2>
+                    <p>{{ quiz.description }}</p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
     </div>
-    <div class="user-page-score">
-        
+    <div class="user-page-content">
+        <h3>Scores</h3>
+        {% for score in user.quiz_score %}
+        <div class="u-content">
+            <h2>{{ score.quiz.name }}</h2>
+            <p>Score: {{ score.score }}</p>
+            <p>Time: {{ score.time }}</p>
+        </div>
+        {% endfor %}
     </div>
 </div>
-
-
-
-<p>Scores</p>
 {% endblock %}

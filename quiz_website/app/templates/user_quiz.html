@@ -20,22 +20,24 @@
         {{ quiz_info.submit }}
     </form>
 </div>
-<div class="user-quiz">
-    {% for q in user_quizzes %}
-        <a href="{{ url_for('view_one_quiz', quiz_id=q.quiz_id) }}">
-            <div class="quiz">
-                <h2>{{ q.name }}</h2>
-                <p>{{ q.description }}</p>
-                <div class="quiz-questions">
-                    {% for question in q.questions %}
-                    <div class="question">
-                        <p>{{ types[question.type] }} question</p>
-                        <p>{{ question.question }}</p>
-                    </div>
-                    {% endfor %}
+<div class="quiz-container user-quiz-container">
+    {% for quiz in user_quizzes %}
+    {# quiz info #}
+    <a href="{{ url_for('view_one_quiz', quiz_id=quiz.quiz_id) }}">
+        <div class="quiz user-my-quiz">
+            <h2>{{ quiz.name }}</h2>
+            <p>{{ quiz.description }}</p>
+            {# loop through all questions in quiz #}
+            <div class="quiz-questions">
+                {% for question in quiz.questions %}
+                <div class="question">
+                    <p><span style="font-weight: bold; font-size: 1.2em;">{{ types[question.type] }}</span></p>
+                    <p>{{ question.question }}</p>
                 </div>
+                {% endfor %}
             </div>
-        </a>
+        </div>
+    </a>
     {% endfor %}
 </div>
 {% endblock %}

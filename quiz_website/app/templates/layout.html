@@ -8,12 +8,12 @@
     <title>{{ title }}</title>
 </head>
 <body>
-    <header>
-        {% include 'header.html' %}
-    </header>
     <nav>
         {% include 'nav.html' %}
     </nav>
+    <header>
+        {% include 'header.html' %}
+    </header>
     <main>
         {% block content %}{% endblock %}
     </main>

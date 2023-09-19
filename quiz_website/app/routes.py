@@ -82,7 +82,7 @@ def user_loader(user_id):
 # Renders home page
 @app.get('/')
 def home():
-    return render_template('home.html', page_header='Home')
+    return render_template('home.html')
 
 
 # Account page, no session shows signup/login forms instead
@@ -234,7 +234,7 @@ def account_login():
 @app.get('/account/settings')
 @login_required
 def settings():
-    return render_template('settings.html')
+    return render_template('settings.html', page_header='Settings')
 
 
 # Display all the quizzes in a page
@@ -539,10 +539,14 @@ def user_page(user_id):
         },
         include={
             'quizzes': True,
-            'quiz_score': True
+            'quiz_score': {
+                'include': {
+                    'quiz': True
+                }
+            }
         }
     )
-    return render_template('user.html', user=user, page_header='User page')
+    return render_template('user.html', user=user)
 
 
 # 404 error
