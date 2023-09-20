@@ -340,9 +340,12 @@ def quiz_creation():
 @app.post('/quiz/create/<form_type>')
 @login_required
 def create(form_type):
-    # Create new quiz
+
     def complete(ref_quiz_id):
-        return redirect(url_for('view_one_quiz', quiz_id=ref_quiz_id))
+        print(ref_quiz_id)
+        return redirect(url_for('view_one_quiz', quiz_id=int(ref_quiz_id)))
+
+    # Create new quiz
     if form_type == '0':
         form = forms.QuizInfo()
         if 'quiz-info' in request.form and form.validate_on_submit():
@@ -363,7 +366,8 @@ def create(form_type):
                 }
             ).quiz_id
             flash('Quiz created', category='info')
-            complete(new_quiz_id)
+            print(new_quiz_id)
+            return complete(new_quiz_id)
 
     # Editing quiz
     
@@ -375,7 +379,7 @@ def create(form_type):
         }
     ).user_id
     if quiz_user != int(current_user.user_id):
-        complete(quiz_id)
+        return complete(quiz_id)
 
     # Create new question for specific quiz
     # Get question_id function used to link answer to created question
@@ -386,7 +390,7 @@ def create(form_type):
         if 'quiz-fact' in request.form and form.validate_on_submit():
             if is_profane(form.fact_statement.data):
                 flash('Question contains profanity', category='error')
-                complete(quiz_id)
+                return complete(quiz_id)
             # Create true statement as question in database
             models.Question.prisma().create(
                 data={
@@ -411,7 +415,7 @@ def create(form_type):
         if 'quiz-written' in request.form and form.validate_on_submit():
             if is_profane(form.written_question.data) or is_profane(form.written_answer.data):
                 flash('Question contains profanity', category='error')
-                complete(quiz_id)
+                return complete(quiz_id)
             models.Question.prisma().create(
                 data={
                     'quiz_id': quiz_id,
@@ -435,7 +439,7 @@ def create(form_type):
         if 'quiz-multi' in request.form and form.validate_on_submit():
             if is_profane(form.multi_question.data) or is_profane(form.correct_answer.data):
                 flash('Question contains profanity', category='error')
-                complete(quiz_id)
+                return complete(quiz_id)
             # Create question
             models.Question.prisma().create(
                 data={
@@ -456,7 +460,7 @@ def create(form_type):
             for answer in [form.false_one.data, form.false_two.data, form.false_three.data]:
                 if is_profane(answer):
                     flash('Question contains profanity', category='error')
-                    complete(quiz_id)
+                    return complete(quiz_id)
                 models.FalseAnswer.prisma().create(
                     data={
                         'question_id': question_id,
@@ -464,7 +468,7 @@ def create(form_type):
                     }
                 )
             flash('Multiple choice question created', category='info')
-    return redirect(url_for('view_one_quiz', quiz_id=quiz_id))
+    return complete(quiz_id)
 
 
 # Start quiz attempt
