@@ -57,18 +57,18 @@
     <div class="leaderboard">
         {% if quiz.user_score|length %}
         <h3>Leaderboard</h3>
-        {% for u in quiz.user_score %}
-        <div class="score">
-            <a href="{{ url_for('user_page', user_id=u.user.user_id) }}">
-                <p>
-                    <span style="border-bottom: solid 3px var(--accent-colour); font-weight: bold">{{ u.user.username }}</span>
-                </p>
-            </a>
-            </span>
-            <p>Placement: {{ loop.index }}</p>
-            <p>Score: {{ u.score }}</p>
-            <p>Time: {{ u.time }}s</p>
-        </div>
+        {% for s in scores %}
+            <div class="score">
+                <a href="{{ url_for('user_page', user_id=s[4]) }}">
+                    <p>
+                        <span style="border-bottom: solid 3px var(--accent-colour); font-weight: bold">{{ s[3] }}</span>
+                    </p>
+                </a>
+                </span>
+                <p>Placement: {{ loop.index }}</p>
+                <p>Score: {{ s[0] }}</p>
+                <p>Time: {{ s[2] }}s</p>
+            </div>
         {% endfor %}
         {% else %}
         <h3>No one has attempted this quiz</h3>

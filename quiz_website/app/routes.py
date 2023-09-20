@@ -304,9 +304,11 @@ def view_one_quiz(quiz_id):
         }
     )
 
-    # Store scores and times on list, then sort in order of score then time
-    scores = [(s.score, s.time, s.user.username) for s in scores]
-    scores.sort()
+    # Store scores and times on list
+    scores = [(s.score, (1/int(s.time)), s.time, s.user.username, s.user.user_id) for s in scores]
+    # Sort scores by score value then sort by the inverse of time taken
+    # Allows for highest score, then lowest time sorted
+    scores.sort(key=lambda score: (score[0], score[1]), reverse=True)
     session['current_quiz_id'] = quiz_id
     return render_template('display_one_quiz.html',
                             quiz=quiz,
@@ -315,7 +317,8 @@ def view_one_quiz(quiz_id):
                             fact_form=fact_form,
                             multi_choice_form=multi_choice_form,
                             quiz_id=quiz_id,
-                            page_header='View quiz'
+                            page_header='View quiz',
+                            scores=scores
                             )
 
 
@@ -366,7 +369,6 @@ def create(form_type):
                 }
             ).quiz_id
             flash('Quiz created', category='info')
-            print(new_quiz_id)
             return complete(new_quiz_id)
 
     # Editing quiz
