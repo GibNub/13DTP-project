@@ -230,13 +230,6 @@ def account_login():
     return redirect(url_for('home'))
 
 
-# Settings page
-@app.get('/account/settings')
-@login_required
-def settings():
-    return render_template('settings.html', page_header='Settings')
-
-
 # Display all the quizzes in a page
 @app.get('/quiz/view/all')
 def view_quiz():

@@ -12,6 +12,22 @@ textarea {
     resize: none;
 }
 
+/* Error pages */
+.error-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    font-size: 1.5em;
+    text-align: center;
+}
+
+.error-page a {
+    margin-top: 20px;
+    background-color: var(--layer-background-colour);
+    padding: 30px;
+}
+
 /* Main page */
 body {
     margin: 0;
@@ -104,6 +120,15 @@ h1 {
     padding: 0;
     margin: 0;
     margin-bottom: 50px;
+}
+
+/* Home page */
+.web-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5em;
 }
 
 

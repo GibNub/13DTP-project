@@ -4,7 +4,6 @@
     <!-- Logged in only -->
     {% if current_user.is_authenticated %}
     <li><a href="{{ url_for('quiz_creation') }}">My Quizzes</a></li>
-    <li><a href="{{ url_for('settings') }}">Settings</a></li>
     <!-- <li><a href="{{ url_for('account') }}">My Account</a></li> -->
     <li><a href="{{ url_for('account_logout') }}">Logout</a></li>
     <!-- Not logged in only -->
