@@ -1,6 +1,5 @@
 {% extends 'layout.html' %}
 {% block content %}
-<script src="{{ url_for('static', filename='randomizeMultichoice.js') }}"></script>
 <div>
     <div class="attempt-quiz-info">
         <h2>{{ quiz.name }}</h2>
@@ -38,10 +37,10 @@
                                     <label for="multi-{{ question.answers[0].answer_id }}">{{ question.answers[0].answer }}</label>
                                     {# false statements #}
                                     {% for f in false_answers %}
-                                    {% if f.question_id == question.question_id %}
+                                        {% if f.question_id == question.question_id %}
                                         <input type="radio" name="{{ question.question_id }}" value="{{ f.answer }}" id="multi-{{ f.false_answer_id }}" required>
                                         <label for="multi-{{ f.false_answer_id }}">{{ f.answer }}</label>
-                                    {% endif %}
+                                        {% endif %}
                                     {% endfor %}
                                 </div>
                             </div>

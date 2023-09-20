@@ -170,7 +170,7 @@ def confirm_email(token):
         email = confirm_token(token)
         print('e')
     except:
-        flash('token invalid', category='error')
+        flash('Token invalid', category='error')
     if not email:
         return redirect(url_for('account'))
     user_data = models.User.prisma().find_first(
@@ -345,7 +345,6 @@ def quiz_creation():
 def create(form_type):
 
     def complete(ref_quiz_id):
-        print(ref_quiz_id)
         return redirect(url_for('view_one_quiz', quiz_id=int(ref_quiz_id)))
 
     # Create new quiz
