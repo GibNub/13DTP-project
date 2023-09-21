@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>405 Error</title>
+</head>
+<body class="error-page">
+    <h1>This request is not allowed</h1>
+    <p>The request you sent is not allowed to be processed by the server</p>
+    <a href="{{ url_for('home') }}"><span class="home-button">Go to home page</span></a>
+</body>
+</html>

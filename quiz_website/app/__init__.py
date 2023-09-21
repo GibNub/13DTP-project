@@ -35,4 +35,4 @@ login_manager.anonymous_user = AnonymousUser
 from app import routes
 
 
-app.run(debug=True)
+app.run(debug=False)
