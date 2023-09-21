@@ -25,6 +25,11 @@ FILTER_LENIANCY = 0.8
 def is_profane(text):
     return predict_prob([text]) > FILTER_LENIANCY
 
+
+def modified_form():
+    return flash('The form could not be validated as it was modified', category='error')
+
+
 # Quick function to get one quiz and all related information
 def get_one_quiz(quiz_id):
     quiz = models.Quiz.prisma().find_first(
@@ -149,6 +154,8 @@ def account_signup():
             }
         )
         flash('Account created, please log in', category='info')
+    else:
+        modified_form()
     # TODO setup email
     # token = generate_token(email)
     # confirm_url = url_for('confirm_email', token=token, _external=True)
@@ -227,6 +234,8 @@ def account_login():
         else:
             flash('Login failed. Username or password is incorrect', category='error')
             return redirect(url_for('account'))
+    else:
+        return redirect(url_for('account'))
     return redirect(url_for('home'))
 
 
@@ -338,7 +347,11 @@ def quiz_creation():
 def create(form_type):
 
     def complete(ref_quiz_id):
-        return redirect(url_for('view_one_quiz', quiz_id=int(ref_quiz_id)))
+        if not ref_quiz_id:
+            url = url_for('quiz_creation')
+        else:
+            url = url_for('view_one_quiz', quiz_id=int(ref_quiz_id))
+        return redirect(url)
 
     # Create new quiz
     if form_type == '0':
@@ -346,6 +359,9 @@ def create(form_type):
         if 'quiz-info' in request.form and form.validate_on_submit():
             if is_profane(form.name.data):
                 flash('Quiz name contains profanity', category='error')
+                return redirect(url_for('quiz_creation'))
+            if is_profane(form.desc.data):
+                flash('Quiz description contains profanity', category='error')
                 return redirect(url_for('quiz_creation'))
             models.Quiz.prisma().create(
                 data={
@@ -362,7 +378,9 @@ def create(form_type):
             ).quiz_id
             flash('Quiz created', category='info')
             return complete(new_quiz_id)
-
+        else:
+            modified_form()
+            return complete(None)
     # Editing quiz
     
     # Check if the current user id is same as user id of quiz creators
@@ -402,6 +420,8 @@ def create(form_type):
                 }
             )
             flash('Fact question created', category='info')
+        else:
+            modified_form()
 
     # Create written question
     elif form_type == '2':
@@ -426,6 +446,8 @@ def create(form_type):
                 }
             )
             flash('Written question created', category='info')
+        else:
+            modified_form()
 
     # Create multiple choice questions for quiz
     elif form_type == '3':
@@ -462,6 +484,8 @@ def create(form_type):
                     }
                 )
             flash('Multiple choice question created', category='info')
+        else:
+            modified_form()
     return complete(quiz_id)
 
 
@@ -494,17 +518,23 @@ def attempt_quiz(quiz_id):
 @app.post('/quiz/attempt/<int:quiz_id>/submit')
 @login_required
 def submit_quiz(quiz_id):
+    error = False
     if not current_user.user_id:
         return redirect(url_for('home'))
     time_now = time()
     user_answers = request.form
     quiz = get_one_quiz(quiz_id)
+    # Validate submitted attempt
+    if len(quiz.questions) == 0:
+        flash('This quiz has no questions', category='error')
+        error = True
+    if len(quiz.questions) != len(user_answers):
+        flash('The submitted attempt is not valid', category='error')
+        error = True
+    if error:
+        return redirect(url_for('view_one_quiz', quiz_id=quiz_id))
     # Define points per question (ppq)
     ppq = MAX_SCORE / len(quiz.questions)
-    # Validate submitted attempt
-    if len(quiz.questions) != len(user_answers):
-        flash('The submitted attempt is not valid', 'error')
-        return redirect(url_for('view_one_quiz', quiz_id=quiz_id))
     # Check if each answer is correct or incorrect, then increment amount correct by one
     correct_count = 0
     for question in quiz.questions:
@@ -536,7 +566,11 @@ def user_page(user_id):
             'user_id': user_id
         },
         include={
-            'quizzes': True,
+            'quizzes': {
+                'include': {
+                    'questions': True
+                }
+            },
             'quiz_score': {
                 'include': {
                     'quiz': True
@@ -544,6 +578,8 @@ def user_page(user_id):
             }
         }
     )
+    if not user:
+        abort(404)
     return render_template('user.html', user=user)
 
 

@@ -19,9 +19,9 @@
                         {% if question.type == 1 %}
                             <div class="fact-answer">
                                 {# true false question #}
-                                <input type="radio" name="{{ question.question_id }}" value="True" id="true-{{ question.question_id }}" required>
+                                <input type="radio" name="{{ question.question_id }}" value="true" id="true-{{ question.question_id }}" required>
                                 <label for="true-{{ question.question_id }}">True</label>
-                                <input type="radio" name="{{ question.question_id }}" value="False" id="false-{{ question.question_id }}" required>
+                                <input type="radio" name="{{ question.question_id }}" value="false" id="false-{{ question.question_id }}" required>
                                 <label for="false-{{ question.question_id }}">False</label>
                             </div>
                         {% elif question.type == 2 %}

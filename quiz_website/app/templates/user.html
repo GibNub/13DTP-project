@@ -8,12 +8,14 @@
         <h3>Quizzes</h3>
         <div class="u-page-container">
             {% for quiz in user.quizzes %}
+            {% if quiz.questions|length > 0 %}
             <a href="{{ url_for('view_one_quiz', quiz_id=quiz.quiz_id) }}">
                 <div class="u-content">
                     <h2>{{ quiz.name }}</h2>
                     <p>{{ quiz.description }}</p>
                 </div>
             </a>
+            {% endif %}
             {% endfor %}
         </div>
     </div>
